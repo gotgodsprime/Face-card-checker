@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Data Collection System</title>
+    <title>Group F Data Collection System</title>
     <style>
         /* --- CSS VARIABLES & THEME (Modern Dark Mode) --- */
         :root {
@@ -248,9 +248,9 @@
 
     <div class="container">
         
-        <header>
-            <h1> Group F Hub</h1>
-            <p>Manage records .</p>
+        <head>
+            <h1> Group F Database Hub</h1>
+            <p>Manage recodes.</p>
         </header>
 
         <section class="card">
@@ -260,15 +260,15 @@
                 
                 <div class="form-group">
                     <label for="studentName">Student Name *</label>
-                    <input type="text" id="studentName" placeholder="e.g. SEFA JNR " required>
+                    <input type="text" id="studentName" placeholder="e.g. SEFA JNR" required>
                 </div>
                 <div class="form-group">
                     <label for="studentId">Student ID *</label>
-                    <input type="text" id="studentId" placeholder="e.g. 2526....." required>
+                    <input type="text" id="studentId" placeholder="e.g. 2526...." required>
                 </div>
                 <div class="form-group">
                     <label for="studentClass">Clas </label>
-                    <input type="text" id="studentClass" placeholder="e.g. groip q">
+                    <input type="text" id="studentClass" placeholder="e.g.Class Z">
                 </div>
                 <div>
                     <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%;">Add Student</button>
@@ -278,9 +278,9 @@
 
         <section class="card">
             <div class="controls-row">
-                <input type="text" id="searchBar" class="search-box" placeholder="Search by name or ID..." oninput="renderStudents()">
+                <input type="text" id="searchBar" class="search-box" placeholder="Searchby name or ID..." oninput="renderStudents()">
                 <button onclick="exportToCSV()" class="btn btn-success">
-                    Download CSV
+                    Download CSV 🔐
                 </button>
             </div>
 
@@ -301,11 +301,11 @@
         </section>
 
         <section class="card">
-            <h2 style="margin-bottom: 1rem;">Group Generator</h2>
+            <h2 style="margin-bottom: 1rem;">Group Generator 🔒</h2>
             <div class="group-controls">
                 <label for="groupSize">Students per group:</label>
                 <input type="number" id="groupSize" value="6" min="2" max="15" style="width: 80px; padding: 0.5rem;">
-                <button onclick="generateGroups()" class="btn btn-primary btn-small">Generate Groups</button>
+                <button onclick="generateGroups()" class="btn btn-primary btn-small">Generate Grups</button>
             </div>
             <div id="groupContainer" class="group-grid">
                 </div>
@@ -315,7 +315,7 @@
 
     <script>
         // --- CONFIGURATION ---
-        const ADMIN_PASSWORD = "Joka@3344GCTU"; // Password required for row deletion
+        const ADMIN_PASSWORD = "Joka@submarine😂"; // Standard authentication key across protected nodes
 
         // Global Array initialized with localStorage data or empty array if none exists
         let students = JSON.parse(localStorage.getItem('students')) || [];
@@ -339,14 +339,14 @@
             localStorage.setItem('students', JSON.stringify(students));
         }
 
-        // Helper: Security check function for critical operations
-        function authenticateAdmin() {
-            const input = prompt("Enter Admin Password to delete this data record:");
+        // Helper: Unified Authentication Gateway
+        function authenticateAdmin(actionName) {
+            const input = prompt(`Enter Admin Password to ${actionName}:`);
             if (input === null) return false; // User pressed Cancel
             if (input === ADMIN_PASSWORD) {
                 return true;
             } else {
-                alert("Incorrect password. Action denied.");
+                alert("Incorrect password. Access denied.");
                 return false;
             }
         }
@@ -432,36 +432,39 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Protected: Remove a student record from the application array with password authorization
+        // Protected: Remove a student record from the application array
         function deleteStudent(id) {
-            // First require the password check
-            if (!authenticateAdmin()) return;
+            // Check credentials first
+            if (!authenticateAdmin("delete this record")) return;
 
-            // Secondary structural safety alert confirmation
-            if (confirm('Are you absolutely sure you want to permanently erase this record?')) {
+            if (confirm('Are you absolutely sure you want to permanently delete this student?')) {
                 students = students.filter(student => student.id !== id);
                 saveToStorage();
                 renderStudents();
             }
         }
 
-        // --- PUBLIC FEATURES ---
+        // --- PROTECTED UTILITIES ---
 
-        // Random Grouping Engine (Fisher-Yates Shuffle Algorithm variant)
+        // Protected: Random Grouping Engine
         function generateGroups() {
-            groupContainer.innerHTML = '';
-            const size = parseInt(groupSizeInput.value);
-
             if (students.length === 0) {
                 groupContainer.innerHTML = '<p class="no-data" style="grid-column: 1/-1;">Add students first to organize groups.</p>';
                 return;
             }
+
+            // Check credentials first
+            if (!authenticateAdmin("generate random groups")) return;
+
+            groupContainer.innerHTML = '';
+            const size = parseInt(groupSizeInput.value);
+
             if (size < 1) return alert('Please enter a valid group size.');
 
             // Shallow clone array to avoid mutating original order array
             let pool = [...students];
             
-            // Randomize array order
+            // Randomize array order (Fisher-Yates Shuffle)
             for (let i = pool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -486,16 +489,18 @@
             }
         }
 
-        // Export data to Standard Comma Separated Value (CSV) sheet format
+        // Protected: Export data to CSV file format
         function exportToCSV() {
             if (students.length === 0) return alert('No records found to download.');
+
+            // Check credentials first
+            if (!authenticateAdmin("download database backup")) return;
 
             // Header mapping row arrays
             let csvContent = "data:text/csv;charset=utf-8,Student ID,Student Name,Class\n";
             
             // Append formatted values row lines
             students.forEach(s => {
-                // Escape quotes inside fields to prevent broken layout syntax strings
                 let cleanName = s.name.replace(/"/g, '""');
                 let cleanClass = s.class.replace(/"/g, '""');
                 csvContent += `"${s.id}","${cleanName}","${cleanClass}"\n`;
@@ -506,10 +511,10 @@
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
             link.setAttribute("download", `student_database_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link); // Required browser node mounting action
+            document.body.appendChild(link);
 
-            link.click(); // Dispatch dynamic download action execution
-            document.body.removeChild(link); // Housekeeping cleanup removal
+            link.click(); 
+            document.body.removeChild(link);
         }
 
         // Initial setup sequence rendering execution
