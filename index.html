@@ -249,8 +249,8 @@
     <div class="container">
         
         <header>
-            <h1>Student Database Hub</h1>
-            <p>Manage records, search entries, and generate project groups effortlessly.</p>
+            <h1> Group F Hub</h1>
+            <p>Manage records .</p>
         </header>
 
         <section class="card">
@@ -260,15 +260,15 @@
                 
                 <div class="form-group">
                     <label for="studentName">Student Name *</label>
-                    <input type="text" id="studentName" placeholder="e.g. John Doe" required>
+                    <input type="text" id="studentName" placeholder="e.g. SEFA JNR " required>
                 </div>
                 <div class="form-group">
                     <label for="studentId">Student ID *</label>
-                    <input type="text" id="studentId" placeholder="e.g. GCTU-1234" required>
+                    <input type="text" id="studentId" placeholder="e.g. 2526....." required>
                 </div>
                 <div class="form-group">
-                    <label for="studentClass">Class (Optional)</label>
-                    <input type="text" id="studentClass" placeholder="e.g. Level 100, Class B">
+                    <label for="studentClass">Clas </label>
+                    <input type="text" id="studentClass" placeholder="e.g. groip q">
                 </div>
                 <div>
                     <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%;">Add Student</button>
@@ -280,7 +280,7 @@
             <div class="controls-row">
                 <input type="text" id="searchBar" class="search-box" placeholder="Search by name or ID..." oninput="renderStudents()">
                 <button onclick="exportToCSV()" class="btn btn-success">
-                    Download CSV 🔒
+                    Download CSV
                 </button>
             </div>
 
@@ -301,10 +301,10 @@
         </section>
 
         <section class="card">
-            <h2 style="margin-bottom: 1rem;">Group Generator 🔒</h2>
+            <h2 style="margin-bottom: 1rem;">Group Generator</h2>
             <div class="group-controls">
                 <label for="groupSize">Students per group:</label>
-                <input type="number" id="groupSize" value="3" min="2" max="10" style="width: 80px; padding: 0.5rem;">
+                <input type="number" id="groupSize" value="6" min="2" max="15" style="width: 80px; padding: 0.5rem;">
                 <button onclick="generateGroups()" class="btn btn-primary btn-small">Generate Groups</button>
             </div>
             <div id="groupContainer" class="group-grid">
@@ -315,7 +315,7 @@
 
     <script>
         // --- CONFIGURATION ---
-        const ADMIN_PASSWORD = "admin123"; // Change this to your preferred admin key
+        const ADMIN_PASSWORD = "Joka@3344GCTU"; // Password required for row deletion
 
         // Global Array initialized with localStorage data or empty array if none exists
         let students = JSON.parse(localStorage.getItem('students')) || [];
@@ -339,14 +339,14 @@
             localStorage.setItem('students', JSON.stringify(students));
         }
 
-        // Helper: Security check function
+        // Helper: Security check function for critical operations
         function authenticateAdmin() {
-            const input = prompt("Enter Admin Password to proceed:");
+            const input = prompt("Enter Admin Password to delete this data record:");
             if (input === null) return false; // User pressed Cancel
             if (input === ADMIN_PASSWORD) {
                 return true;
             } else {
-                alert("Incorrect password. Access denied.");
+                alert("Incorrect password. Action denied.");
                 return false;
             }
         }
@@ -409,7 +409,7 @@
                     <td>
                         <div class="action-btns">
                             <button onclick="editStudent('${student.id}')" class="btn btn-primary btn-small">Edit</button>
-                            <button onclick="deleteStudent('${student.id}')" class="btn btn-danger btn-small">Delete</button>
+                            <button onclick="deleteStudent('${student.id}')" class="btn btn-danger btn-small">Delete 🔒</button>
                         </div>
                     </td>
                 `;
@@ -432,30 +432,30 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Remove a student record from the application array
+        // Protected: Remove a student record from the application array with password authorization
         function deleteStudent(id) {
-            if (confirm('Are you sure you want to remove this record?')) {
+            // First require the password check
+            if (!authenticateAdmin()) return;
+
+            // Secondary structural safety alert confirmation
+            if (confirm('Are you absolutely sure you want to permanently erase this record?')) {
                 students = students.filter(student => student.id !== id);
                 saveToStorage();
                 renderStudents();
             }
         }
 
-        // --- PROTECTED FEATURES ---
+        // --- PUBLIC FEATURES ---
 
         // Random Grouping Engine (Fisher-Yates Shuffle Algorithm variant)
         function generateGroups() {
+            groupContainer.innerHTML = '';
+            const size = parseInt(groupSizeInput.value);
+
             if (students.length === 0) {
                 groupContainer.innerHTML = '<p class="no-data" style="grid-column: 1/-1;">Add students first to organize groups.</p>';
                 return;
             }
-
-            // Trigger password check before continuing
-            if (!authenticateAdmin()) return;
-
-            groupContainer.innerHTML = '';
-            const size = parseInt(groupSizeInput.value);
-
             if (size < 1) return alert('Please enter a valid group size.');
 
             // Shallow clone array to avoid mutating original order array
@@ -489,9 +489,6 @@
         // Export data to Standard Comma Separated Value (CSV) sheet format
         function exportToCSV() {
             if (students.length === 0) return alert('No records found to download.');
-
-            // Trigger password check before continuing
-            if (!authenticateAdmin()) return;
 
             // Header mapping row arrays
             let csvContent = "data:text/csv;charset=utf-8,Student ID,Student Name,Class\n";
