@@ -3,356 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hybrid Anti-Cheat Attendance System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <title>Student Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-color: #f4f6f9;
-            --card-bg: #ffffff;
-            --text-main: #2d3748;
-            --text-muted: #718096;
-            --border-color: #e2e8f0;
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --success: #10b981;
-            --success-light: #d1fae5;
-            --danger: #ef4444;
-            --danger-light: #fee2e2;
-            --warning: #f59e0b;
-            --radius: 12px;
-        }
-
-        [data-theme="dark"] {
             --bg-color: #0f172a;
             --card-bg: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border-color: #334155;
-            --success-light: rgba(16, 185, 129, 0.2);
-            --danger-light: rgba(239, 68, 68, 0.2);
+            --primary: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --radius: 12px;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; transition: background 0.3s; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
-        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        
-        .hidden { display: none !important; }
-        #sessionModal { text-align: center; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #qrcode { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; border: 4px solid var(--primary); }
-
-        .big-code { font-size: 3.5rem; font-weight: 800; color: #10b981; letter-spacing: 5px; margin: 15px 0; background: #1e293b; padding: 10px 30px; border-radius: 10px; display: inline-block; }
-        .timer-box { font-size: 1.2rem; font-weight: bold; color: var(--warning); margin-bottom: 10px; background: #1e293b; padding: 8px 16px; border-radius: 20px; display: inline-block;}
-
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 15px; text-align: center; }
-        .app-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
-        @media (min-width: 900px) { .app-grid { grid-template-columns: 350px 1fr; } }
-
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-color); color: var(--text-main); }
-        
-        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 25px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); width: 100%; max-width: 420px; }
+        h2 { text-align: center; margin-bottom: 8px; font-size: 1.5rem; }
+        p.subtitle { color: var(--text-muted); text-align: center; margin-bottom: 24px; font-size: 0.9rem; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
+        .form-control { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-color); color: var(--text-main); font-size: 1rem; }
+        .form-control:focus { outline: none; border-color: var(--primary); }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-secondary { background: var(--text-muted); color: white; }
-
-        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 15px; }
-        th, td { padding: 12px; border-bottom: 1px solid var(--border-color); }
-        tr.status-present { background-color: var(--success-light); }
+        .hidden { display: none !important; }
+        #message { text-align: center; margin-top: 15px; font-weight: bold; padding: 10px; border-radius: 6px; }
+        .welcome-badge { background: #334155; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid var(--border-color); }
+        .welcome-badge strong { color: var(--primary); }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div id="studentView" class="card hidden" style="max-width: 500px; margin: 40px auto;">
-            <h2 style="text-align: center; margin-bottom: 10px;">📱 Student Attendance Portal</h2>
-            <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px;" id="studentDateDisplay"></p>
-            
-            <form id="studentCheckInForm">
+    <div class="card">
+        <div id="registerSection" class="hidden">
+            <h2>👋 First-Time Registration</h2>
+            <p class="subtitle">Enter your real details. You will only do this once.</p>
+            <form id="registerForm">
                 <div class="form-group">
-                    <label for="checkInId">Your Student ID / Roll Number</label>
-                    <input type="text" id="checkInId" class="form-control" placeholder="e.g. STU101" required style="font-size: 1.2rem; text-align: center; margin-bottom: 15px;">
+                    <label>Student ID / Roll Number</label>
+                    <input type="text" id="regId" class="form-control" placeholder="e.g. STU101" required>
                 </div>
-                
                 <div class="form-group">
-                    <label for="checkInCode">Enter Active 4-Digit Classroom Code</label>
-                    <input type="text" id="checkInCode" class="form-control" placeholder="0000" maxlength="4" required style="font-size: 1.5rem; text-align: center; letter-spacing: 4px; font-weight: bold;">
-                    <small style="color: var(--text-muted); display: block; text-align: center; margin-top: 5px;">Get this code from the projector screen, chalkboard, or lecturer.</small>
+                    <label>Full Name</label>
+                    <input type="text" id="regName" class="form-control" placeholder="John Doe" required>
                 </div>
-                
-                <button type="submit" class="btn btn-success" style="width: 100%; font-size: 1.1rem; padding: 14px; margin-top: 10px;">Verify & Mark Attendance ✅</button>
+                <div class="form-group">
+                    <label>Class / Course / Level</label>
+                    <input type="text" id="regCourse" class="form-control" placeholder="e.g. BSc Computer Science Level 200" required>
+                </div>
+                <button type="submit" class="btn btn-primary">💾 Save Profile to Device</button>
             </form>
-            <p id="checkInMessage" style="text-align: center; margin-top: 15px; font-weight: bold; font-size: 1.1rem;"></p>
         </div>
 
-        <div id="teacherView">
-            <header>
-                <div>
-                    <h1>⚡ Hybrid Attendance Dashboard (Dumsor-Proof)</h1>
-                    <p style="color: var(--text-muted);">Switch easily between Dynamic QR codes or verbal 4-digit codes if the power goes out.</p>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <input type="date" id="datePicker" style="padding: 8px; border-radius: 6px;">
-                    <button class="btn btn-secondary" onclick="toggleTheme()">🌓 Theme</button>
-                </div>
-            </header>
-
-            <div class="card" style="background: linear-gradient(135deg, #4f46e5, #0f172a); color: white; display: flex; flex-direction: column; gap: 15px;">
-                <div>
-                    <h2>Select Attendance Method for Today:</h2>
-                    <p style="opacity: 0.9; margin-top: 4px;">Choose QR if the projector is active, or use Verbal Code if there is no electricity.</p>
-                </div>
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button class="btn" style="background: #10b981; color: white;" onclick="startSession('qr')">🖼️ Method A: Start Dynamic QR</button>
-                    <button class="btn" style="background: #f59e0b; color: white;" onclick="startSession('code')">🗣️ Method B: Start Verbal One-Time Code</button>
-                </div>
+        <div id="checkInSection" class="hidden">
+            <h2>📱 Attendance Check-In</h2>
+            <p class="subtitle" id="dateDisplay"></p>
+            
+            <div class="welcome-badge">
+                Logged in as: <strong id="studentInfoDisplay">...</strong>
             </div>
 
-            <div id="sessionModal" class="card hidden">
-                <h2 id="sessionTitle">🔒 Active Security Session</h2>
-                <p id="sessionDesc" style="color: var(--text-muted); margin-bottom: 10px;"></p>
-                
-                <div class="timer-box">⏳ Changes automatically in: <span id="countdown">30</span>s</div>
-                
-                <div id="verbalCodeContainer" class="hidden">
-                    <div class="big-code" id="activeVerbalCode">0000</div>
-                    <p style="font-weight: 500;">Write this number on the board or say it out loud!</p>
+            <form id="checkInForm">
+                <div class="form-group">
+                    <label>Class Passcode</label>
+                    <input type="text" id="passcode" class="form-control" placeholder="Enter 4-Digit Code" maxlength="6" required style="font-size: 1.8rem; text-align: center; letter-spacing: 6px; font-weight: bold; text-transform: uppercase;">
+                    <small style="color: var(--text-muted); display: block; text-align: center; margin-top: 8px;">Look at the projector screen, chalkboard, or ask the Lecturer.</small>
                 </div>
-
-                <div id="qrcode" class="hidden"></div>
-                
-                <button class="btn btn-danger" onclick="stopSession()" style="margin-top: 20px;">❌ Close & Lock Attendance</button>
-            </div>
-
-            <section class="stats-grid">
-                <div class="stat-card"><p>Total Class Roster</p><h3 id="statTotal">0</h3></div>
-                <div class="stat-card" style="border-left: 4px solid var(--success);"><p>Present Today</p><h3 id="statPresent" style="color: var(--success);">0</h3></div>
-                <div class="stat-card" style="border-left: 4px solid var(--danger);"><p>Absent / Unmarked</p><h3 id="statAbsent" style="color: var(--danger);">0</h3></div>
-                <div class="stat-card" style="border-left: 4px solid var(--primary);"><p>Attendance Rate</p><h3 id="statRate">0%</h3></div>
-            </section>
-
-            <main class="app-grid">
-                <section class="card">
-                    <h2>Add Student to Database</h2>
-                    <form id="studentForm">
-                        <div class="form-group"><label>Student ID</label><input type="text" id="studentId" class="form-control" required placeholder="STU101"></div>
-                        <div class="form-group"><label>Full Name</label><input type="text" id="studentName" class="form-control" required placeholder="Jane Doe"></div>
-                        <div class="form-group"><label>Class/Course</label><input type="text" id="studentCourse" class="form-control" required placeholder="Level 100"></div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">➕ Register Student</button>
-                    </form>
-                </section>
-
-                <section class="card">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                        <h2>Live Attendance Logs</h2>
-                        <button class="btn btn-secondary" onclick="exportCSV()" style="background: #0284c7;">📥 Export CSV</button>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table>
-                            <thead><tr><th>ID</th><th>Name</th><th>Course</th><th>Status</th></tr></thead>
-                            <tbody id="rosterBody"></tbody>
-                        </table>
-                    </div>
-                </section>
-            </main>
+                <button type="submit" class="btn btn-success">✅ Verify & Mark Me Present</button>
+            </form>
+            <div id="message" class="hidden"></div>
         </div>
     </div>
 
     <script>
-        let students = JSON.parse(localStorage.getItem('hybrid_students')) || [];
-        let attendanceData = JSON.parse(localStorage.getItem('hybrid_attendance')) || {};
+        // --- 🔴 IMPORTANT: CONFIGURATION ---
+        // Replace these strings with your actual Supabase URL and Anon Key
+        const SUPABASE_URL = "YOUR_SUPABASE_URL";
+        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const datePicker = document.getElementById('datePicker');
-        const rosterBody = document.getElementById('rosterBody');
-        
-        let sessionInterval = null;
-        let countdownInterval = null;
-        let activeSessionType = ""; // 'qr' or 'code'
-        const REFRESH_RATE = 30; // Code updates every 30 seconds to give students time to type it
+        // App States
+        let cachedStudent = JSON.parse(localStorage.getItem('my_attendance_profile'));
 
         window.addEventListener('DOMContentLoaded', () => {
-            const today = new Date().toISOString().split('T');
-            datePicker.value = today;
-            document.getElementById('studentDateDisplay').innerText = `Date: ${today}`;
-
+            // Check if URL contains an auto-scanned token parameter from QR code
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('role') === 'student') {
-                document.getElementById('teacherView').classList.add('hidden');
-                document.getElementById('studentView').classList.remove('hidden');
-                
-                // Automatically fill out the code field if it was passed via QR code URL
-                if(urlParams.get('token')) {
-                    document.getElementById('checkInCode').value = urlParams.get('token');
-                }
-            } else {
-                renderDashboard();
+            const tokenFromUrl = urlParams.get('token');
+            if (tokenFromUrl) {
+                document.getElementById('passcode').value = tokenFromUrl;
             }
 
-            datePicker.addEventListener('change', renderDashboard);
+            document.getElementById('dateDisplay').innerText = `Today's Date: ${new Date().toISOString().split('T')}`;
+            routeUserView();
         });
 
-        // Add Student logic
-        document.getElementById('studentForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const id = document.getElementById('studentId').value.trim();
-            const name = document.getElementById('studentName').value.trim();
-            const course = document.getElementById('studentCourse').value.trim();
+        function routeUserView() {
+            if (!cachedStudent) {
+                document.getElementById('registerSection').classList.remove('hidden');
+                document.getElementById('checkInSection').classList.add('hidden');
+            } else {
+                document.getElementById('registerSection').classList.add('hidden');
+                document.getElementById('checkInSection').classList.remove('hidden');
+                document.getElementById('studentInfoDisplay').innerText = `${cachedStudent.name} (${cachedStudent.id})`;
+            }
+        }
 
-            if (students.some(s => s.id === id)) return alert("ID already exists!");
-            students.push({ id, name, course });
-            localStorage.setItem('hybrid_students', JSON.stringify(students));
-            document.getElementById('studentForm').reset();
-            renderDashboard();
+        // Handle Registration
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('regId').value.trim().toUpperCase();
+            const name = document.getElementById('regName').value.trim();
+            const course = document.getElementById('regCourse').value.trim();
+
+            // Save to central cloud database
+            const { error } = await supabase
+                .from('students')
+                .upsert({ id, name, course }, { onConflict: 'id' });
+
+            if (error) {
+                alert("Database Error: " + error.message);
+                return;
+            }
+
+            // Save to local browser cache memory permanently
+            cachedStudent = { id, name, course };
+            localStorage.setItem('my_attendance_profile', JSON.stringify(cachedStudent));
+            routeUserView();
         });
 
-        // Student Self-Check-In Verification Logic
-        document.getElementById('studentCheckInForm').addEventListener('submit', (e) => {
+        // Handle Check-In Submission
+        document.getElementById('checkInForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const inputId = document.getElementById('checkInId').value.trim();
-            const inputCode = document.getElementById('checkInCode').value.trim();
-            const msg = document.getElementById('checkInMessage');
+            const userCode = document.getElementById('passcode').value.trim().toUpperCase();
             const today = new Date().toISOString().split('T');
+            const msgDiv = document.getElementById('message');
 
-            // 1. Verify student exists
-            const studentExists = students.some(s => s.id === inputId);
-            if (!studentExists) {
-                msg.style.color = "var(--danger)";
-                msg.innerText = "❌ ID not found in class database!";
+            msgDiv.className = "";
+            msgDiv.classList.remove('hidden');
+            msgDiv.style.color = "white";
+            msgDiv.innerText = "Checking validation token...";
+
+            // 1. Fetch active token from server
+            const { data: tokenData, error: tokenError } = await supabase
+                .from('security_tokens')
+                .select('token')
+                .eq('id', 'active_session')
+                .single();
+
+            if (tokenError || !tokenData) {
+                msgDiv.innerText = "❌ Connection failed. Refresh and try again.";
+                msgDiv.style.backgroundColor = var(--danger);
                 return;
             }
 
-            // 2. Anti-Cheat Session Check
-            const currentSystemActiveToken = localStorage.getItem('active_attendance_token');
-            if (!currentSystemActiveToken || inputCode !== currentSystemActiveToken) {
-                msg.style.color = "var(--danger)";
-                msg.innerText = "❌ Invalid or Expired Code! Check the board for the new code.";
+            // 2. ANTI-CHEAT VERIFICATION STEP
+            if (userCode !== tokenData.token) {
+                msgDiv.innerText = "❌ Code Expired or Invalid! Look up at the board for the new one.";
+                msgDiv.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
+                msgDiv.style.color = var(--danger);
                 return;
             }
 
-            // Successfully Marked Present
-            if (!attendanceData[today]) attendanceData[today] = {};
-            attendanceData[today][inputId] = "Present";
-            localStorage.setItem('hybrid_attendance', JSON.stringify(attendanceData));
+            // 3. Mark attendance live into the system
+            const { error: logError } = await supabase
+                .from('attendance_logs')
+                .insert({ student_id: cachedStudent.id, date: today, status: 'Present' });
 
-            msg.style.color = "var(--success)";
-            msg.innerText = "✅ Attendance Verified Successfully!";
-            document.getElementById('studentCheckInForm').reset();
+            if (logError) {
+                if (logError.code === "23505") { // Unique constraint error code
+                    msgDiv.innerText = "ℹ️ You have already been marked present for today!";
+                    msgDiv.style.backgroundColor = "rgba(16, 185, 129, 0.1)";
+                    msgDiv.style.color = var(--success);
+                } else {
+                    msgDiv.innerText = "❌ Error: " + logError.message;
+                    msgDiv.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
+                }
+                return;
+            }
+
+            msgDiv.innerText = "🚀 Attendance Successfully Recorded!";
+            msgDiv.style.backgroundColor = "rgba(16, 185, 129, 0.2)";
+            msgDiv.style.color = var(--success);
+            document.getElementById('passcode').value = "";
         });
-
-        // Core Session Loops (Handles both QR and Verbal Numbers)
-        function updateSessionCycle() {
-            let activeToken = "";
-
-            if (activeSessionType === 'code') {
-                // Generate random 4-digit code number string
-                activeToken = Math.floor(1000 + Math.random() * 9000).toString();
-                document.getElementById('activeVerbalCode').innerText = activeToken;
-            } else if (activeSessionType === 'qr') {
-                // Generate a random string token for the QR URL parameter
-                activeToken = Math.random().toString(36).substring(2, 6).toUpperCase();
-                const baseUrl = window.location.href.split('?');
-                const studentLink = `${baseUrl}?role=student&token=${activeToken}`;
-                
-                document.getElementById('qrcode').innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: studentLink, width: 250, height: 250 });
-            }
-
-            // Save active session token to local storage
-            localStorage.setItem('active_attendance_token', activeToken);
-        }
-
-        function startSession(type) {
-            activeSessionType = type;
-            document.getElementById('sessionModal').classList.remove('hidden');
-            
-            if (type === 'code') {
-                document.getElementById('sessionTitle').innerText = "🗣️ Verbal One-Time Code Active";
-                document.getElementById('sessionDesc').innerText = "Announce or write the number below on the chalkboard.";
-                document.getElementById('verbalCodeContainer').classList.remove('hidden');
-                document.getElementById('qrcode').classList.add('hidden');
-            } else {
-                document.getElementById('sessionTitle').innerText = "🖼️ Dynamic QR Code Screen Active";
-                document.getElementById('sessionDesc').innerText = "Project this screen or place your laptop forward for scanning.";
-                document.getElementById('qrcode').classList.remove('hidden');
-                document.getElementById('verbalCodeContainer').classList.add('hidden');
-            }
-
-            updateSessionCycle();
-
-            let timeLeft = REFRESH_RATE;
-            document.getElementById('countdown').innerText = timeLeft;
-
-            countdownInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('countdown').innerText = timeLeft;
-                if (timeLeft <= 0) timeLeft = REFRESH_RATE;
-            }, 1000);
-
-            sessionInterval = setInterval(updateSessionCycle, REFRESH_RATE * 1000);
-        }
-
-        function stopSession() {
-            clearInterval(sessionInterval);
-            clearInterval(countdownInterval);
-            localStorage.removeItem('active_attendance_token');
-            document.getElementById('sessionModal').classList.add('hidden');
-            renderDashboard();
-        }
-
-        function renderDashboard() {
-            const date = datePicker.value;
-            rosterBody.innerHTML = '';
-            const dailyLogs = attendanceData[date] || {};
-            let presentCount = 0;
-
-            students.forEach(student => {
-                const isPresent = dailyLogs[student.id] === 'Present';
-                if (isPresent) presentCount++;
-
-                const row = document.createElement('tr');
-                if (isPresent) row.classList.add('status-present');
-
-                row.innerHTML = `
-                    <td><strong>${student.id}</strong></td>
-                    <td>${student.name}</td>
-                    <td>${student.course}</td>
-                    <td>${isPresent ? '✅ Present' : '⏳ Absent / Unmarked'}</td>
-                `;
-                rosterBody.appendChild(row);
-            });
-
-            const total = students.length;
-            document.getElementById('statTotal').innerText = total;
-            document.getElementById('statPresent').innerText = presentCount;
-            document.getElementById('statAbsent').innerText = total - presentCount;
-            document.getElementById('statRate').innerText = `${total > 0 ? Math.round((presentCount / total) * 100) : 0}%`;
-        }
-
-        function exportCSV() {
-            const date = datePicker.value;
-            const dailyLogs = attendanceData[date] || {};
-            let csv = "data:text/csv;charset=utf-8,Student ID,Name,Course,Status\n";
-            students.forEach(s => {
-                csv += `"${s.id}","${s.name}","${s.course}","${dailyLogs[s.id] === 'Present' ? 'Present' : 'Absent'}"\n`;
-            });
-            const link = document.createElement("a");
-            link.setAttribute("href", encodeURI(csv));
-            link.setAttribute("download", `Attendance_${date}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function toggleTheme() {
-            const current = document.documentElement.getAttribute('data-theme');
-            if (current === 'dark') document.documentElement.removeAttribute('data-theme');
-            else document.documentElement.setAttribute('data-theme', 'dark');
-        }
     </script>
 </body>
 </html>
