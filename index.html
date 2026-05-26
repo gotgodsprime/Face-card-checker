@@ -2,333 +2,206 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Portal</title>
-    <!-- Supabase JS Client library CDN -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SmartCheck Attendance</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        /* Light/Dark high-contrast forced theme variables */
-        :root {
-            --bg-color: #0f172a !important;
-            --card-bg: #1e293b !important;
-            --text-main: #ffffff !important;
-            --text-muted: #94a3b8 !important;
-            --border-color: #475569 !important;
-            --primary: #6366f1 !important;
-            --success: #10b981 !important;
-            --danger: #ef4444 !important;
-        }
-
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: system-ui, -apple-system, sans-serif; 
-        }
-
-        body { 
-            background-color: #0f172a !important; 
-            color: #ffffff !important; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-        }
-
-        .container {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        /* WARNING STATUS BANNER - VISIBLE IF NOT SET UP */
-        .config-warning {
-            background-color: #7f1d1d !important;
-            border: 2px solid #ef4444 !important;
-            color: #fca5a5 !important;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .card { 
-            background-color: #1e293b !important; 
-            border: 2px solid #334155 !important; 
-            border-radius: 12px; 
-            padding: 25px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
-            width: 100%;
-        }
-
-        h2 { 
-            text-align: center; 
-            margin-bottom: 8px; 
-            font-size: 1.6rem; 
-            color: #ffffff !important;
-            font-weight: 700;
-        }
-
-        p.subtitle { 
-            color: #94a3b8 !important; 
-            text-align: center; 
-            margin-bottom: 24px; 
-            font-size: 0.95rem; 
-        }
-
-        .form-group { 
-            margin-bottom: 20px; 
-        }
-
-        label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-size: 0.9rem; 
-            font-weight: 600; 
-            color: #cbd5e1 !important; 
-        }
-
-        .form-control { 
-            width: 100%; 
-            padding: 14px; 
-            border: 2px solid #475569 !important; 
-            border-radius: 8px; 
-            background-color: #0f172a !important; 
-            color: #ffffff !important; 
-            font-size: 1.1rem; 
-        }
-
-        .form-control::placeholder {
-            color: #64748b !important;
-        }
-
-        .btn { 
-            width: 100%; 
-            padding: 16px; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: 700; 
-            font-size: 1.1rem; 
-            cursor: pointer; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 8px; 
-            margin-top: 10px;
-        }
-
-        .btn-primary { 
-            background-color: #4f46e5 !important; 
-            color: #ffffff !important; 
-        }
-        
-        .btn-success { 
-            background-color: #10b981 !important; 
-            color: #ffffff !important; 
-        }
-
-        .hidden { 
-            display: none !important; 
-        }
-
-        #message { 
-            text-align: center; 
-            margin-top: 15px; 
-            font-weight: bold; 
-            padding: 12px; 
-            border-radius: 6px; 
-        }
-
-        .welcome-badge { 
-            background: #334155 !important; 
-            padding: 14px; 
-            border-radius: 8px; 
-            text-align: center; 
-            margin-bottom: 24px; 
-            border: 1px solid #475569 !important;
-            color: #ffffff !important;
-            font-size: 1rem;
-        }
-        .welcome-badge strong { 
-            color: #818cf8 !important; 
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="flex flex-col min-h-screen justify-between p-4 relative">
+    
+    <div class="glow-bg bg-blue-600 w-64 h-64 top-10 left-10 rounded-full"></div>
+    <div class="glow-bg bg-purple-600 w-64 h-64 bottom-10 right-10 rounded-full"></div>
 
-    <div class="container">
-        <!-- Live Visual Verification Banner -->
-        <div id="setupWarning" class="config-warning hidden">
-            ⚠️ Warning: Supabase Credentials are not set up yet! Edit index.html to insert your database API keys.
+    <header class="z-10 w-full max-w-md mx-auto text-center py-4">
+        <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">SmartCheck</h1>
+        <p class="text-xs text-gray-400 mt-1">Student Attendance Portal</p>
+    </header>
+
+    <main class="z-10 w-full max-w-md mx-auto flex-grow flex items-center justify-center">
+        
+        <div id="regView" class="glass w-full rounded-3xl p-6 hidden space-y-4 shadow-2xl transition-all duration-300">
+            <h2 class="text-xl font-semibold text-white mb-2">One-Time Registration</h2>
+            <div>
+                <label class="text-xs text-gray-400 block mb-1 font-medium">Full Name</label>
+                <input type="text" id="regName" class="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500" placeholder="John Doe">
+            </div>
+            <div>
+                <label class="text-xs text-gray-400 block mb-1 font-medium">Student ID</label>
+                <input type="text" id="regId" class="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500" placeholder="STU10294">
+            </div>
+            <div>
+                <label class="text-xs text-gray-400 block mb-1 font-medium">Course / Level</label>
+                <input type="text" id="regCourse" class="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500" placeholder="Computer Science 101">
+            </div>
+            <button onclick="saveRegistration()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl py-3 mt-4 transition active:scale-95 shadow-lg">
+                Complete Setup
+            </button>
         </div>
 
-        <div class="card">
-            <!-- PHASE 1: REGISTRATION SCREEN -->
-            <div id="registerSection" class="hidden">
-                <h2>👋 Registration</h2>
-                <p class="subtitle">Enter your details. You will only do this once.</p>
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label>Student ID / Roll Number</label>
-                        <input type="text" id="regId" class="form-control" placeholder="e.g. STU101" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="regName" class="form-control" placeholder="John Doe" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Class / Course / Level</label>
-                        <input type="text" id="regCourse" class="form-control" placeholder="e.g. Level 200" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">💾 Save Profile to Device</button>
-                </form>
+        <div id="attendanceView" class="glass w-full rounded-3xl p-6 hidden space-y-6 shadow-2xl text-center">
+            <div>
+                <p class="text-sm text-gray-400">Welcome back,</p>
+                <h2 id="studentGreeting" class="text-xl font-bold text-white">Student</h2>
             </div>
 
-            <!-- PHASE 2: ATTENDANCE CHECK-IN SCREEN -->
-            <div id="checkInSection" class="hidden">
-                <h2>📱 Attendance Portal</h2>
-                <p class="subtitle" id="dateDisplay"></p>
-                
-                <div class="welcome-badge">
-                    Logged in as: <strong id="studentInfoDisplay">...</strong>
-                </div>
-
-                <form id="checkInForm">
-                    <div class="form-group">
-                        <label>Class Passcode</label>
-                        <input type="text" id="passcode" class="form-control" placeholder="Enter Code" maxlength="6" required style="font-size: 1.8rem; text-align: center; letter-spacing: 4px; font-weight: bold; text-transform: uppercase;">
-                    </div>
-                    <button type="submit" class="btn btn-success">✅ Verify & Check In</button>
-                </form>
-                <div id="message" class="hidden"></div>
+            <div class="space-y-2">
+                <label class="text-xs text-gray-400 block font-medium">Enter Active Class Passcode</label>
+                <input type="text" id="passcode" maxlength="4" class="w-40 text-center tracking-widest text-3xl font-bold bg-gray-900/60 border-2 border-gray-700 rounded-2xl px-3 py-3 text-white focus:outline-none focus:border-blue-500 transition-all" placeholder="0000">
             </div>
+
+            <button onclick="submitAttendance()" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl py-3 transition active:scale-95 shadow-md flex items-center justify-center space-x-2">
+                <span>Mark Me Present</span>
+            </button>
+
+            <div id="statusMsg" class="text-sm font-medium rounded-xl p-3 hidden transition-all"></div>
+            
+            <button onclick="clearProfile()" class="text-xs text-gray-500 hover:text-gray-400 underline pt-4 block mx-auto">Reset Profile Identity</button>
         </div>
-    </div>
+    </main>
+
+    <footer class="z-10 text-center py-4 text-xs text-gray-600">
+        &copy; 2026 SmartCheck System. Full-screen Mobile Optimized.
+    </footer>
 
     <script>
-        // --- 🔴 REPLACE THESE WITH YOUR COPIED CONFIGS FROM SUPABASE ---
-        const SUPABASE_URL = "YOUR_SUPABASE_URL";
-        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+        // Supabase Initialization using injection parameters
+        const SUPABASE_URL = "https://ntxuezuxnbbrtoenimyk.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50eHVlenV4bmJicnRvZW5pbXlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTEyMzIsImV4cCI6MjA5NTM4NzIzMn0.3unzuoVz0Mk6Ocy6cd66O5yefMwbz8KcT-kPxS3SCZA";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let supabase = null;
+        document.addEventListener("DOMContentLoaded", () => {
+            initApp();
+            // Handle PWA Setup
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log("SW error", err));
+            }
+        });
 
-        // Check if configuration placeholders have been customized
-        if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
-            supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else {
-            document.getElementById('setupWarning').classList.remove('hidden');
-        }
-
-        let cachedStudent = JSON.parse(localStorage.getItem('my_attendance_profile'));
-
-        window.addEventListener('DOMContentLoaded', () => {
+        function initApp() {
+            const studentData = localStorage.getItem("student_profile");
             const urlParams = new URLSearchParams(window.location.search);
-            const tokenFromUrl = urlParams.get('token');
-            if (tokenFromUrl) {
-                document.getElementById('passcode').value = tokenFromUrl;
-            }
+            const tokenParam = urlParams.get('token');
 
-            document.getElementById('dateDisplay').innerText = `Today's Date: ${new Date().toISOString().split('T')}`;
-            routeUserView();
-        });
-
-        function routeUserView() {
-            if (!cachedStudent) {
-                document.getElementById('registerSection').classList.remove('hidden');
-                document.getElementById('checkInSection').classList.add('hidden');
+            if (!studentData) {
+                document.getElementById("regView").classList.remove("hidden");
+                document.getElementById("attendanceView").classList.add("hidden");
             } else {
-                document.getElementById('registerSection').classList.add('hidden');
-                document.getElementById('checkInSection').classList.remove('hidden');
-                document.getElementById('studentInfoDisplay').innerText = `${cachedStudent.name} (${cachedStudent.id})`;
+                document.getElementById("regView").classList.add("hidden");
+                const profile = JSON.parse(studentData);
+                document.getElementById("studentGreeting").innerText = profile.name;
+                document.getElementById("attendanceView").classList.remove("hidden");
+
+                if (tokenParam) {
+                    const passField = document.getElementById("passcode");
+                    passField.value = tokenParam;
+                    // Trigger highlighting action state
+                    passField.classList.remove("border-gray-700");
+                    passField.classList.add("border-green-400", "bg-green-950/20");
+                    document.getElementById("submitBtn").classList.replace("bg-blue-600", "bg-gradient-to-r");
+                    document.getElementById("submitBtn").classList.add("from-green-500", "to-emerald-600 animate-pulse");
+                }
             }
         }
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('regId').value.trim().toUpperCase();
-            const name = document.getElementById('regName').value.trim();
-            const course = document.getElementById('regCourse').value.trim();
+        async function saveRegistration() {
+            const name = document.getElementById("regName").value.trim();
+            const student_id = document.getElementById("regId").value.trim();
+            const course = document.getElementById("regCourse").value.trim();
 
-            if (!supabase) {
-                alert("Cannot connect to Database. Please enter real Supabase credentials first!");
+            if (!name || !student_id || !course) {
+                alert("Please fill all configuration metrics.");
                 return;
             }
 
-            const { error } = await supabase
-                .from('students')
-                .upsert({ id, name, course }, { onConflict: 'id' });
-
+            const profile = { name, student_id, course };
+            
+            // Check-In/Register inside centralized remote cloud table record
+            const { error } = await supabase.from('students').upsert([profile], { onConflict: 'student_id' });
             if (error) {
-                alert("Database Error: " + error.message);
+                alert("Database Sync Error: " + error.message);
                 return;
             }
 
-            cachedStudent = { id, name, course };
-            localStorage.setItem('my_attendance_profile', JSON.stringify(cachedStudent));
-            routeUserView();
-        });
+            localStorage.setItem("student_profile", JSON.stringify(profile));
+            initApp();
+        }
 
-        document.getElementById('checkInForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const userCode = document.getElementById('passcode').value.trim().toUpperCase();
-            const today = new Date().toISOString().split('T');
-            const msgDiv = document.getElementById('message');
+        async function submitAttendance() {
+            const statusBox = document.getElementById("statusMsg");
+            statusBox.className = "text-sm font-medium rounded-xl p-3 hidden"; 
+            
+            const enteredToken = document.getElementById("passcode").value.trim();
+            const profile = JSON.parse(localStorage.getItem("student_profile"));
 
-            msgDiv.className = "";
-            msgDiv.classList.remove('hidden');
-            msgDiv.style.color = "white";
-            msgDiv.innerText = "Checking validation token...";
-
-            if (!supabase) {
-                msgDiv.innerText = "❌ Connection failed. Supabase is not configured.";
-                msgDiv.style.backgroundColor = "#ef4444";
+            if (!enteredToken) {
+                showStatus("Please supply a token entry.", false);
                 return;
             }
 
-            const { data: tokenData, error: tokenError } = await supabase
-                .from('security_tokens')
-                .select('token')
-                .eq('id', 'active_session')
-                .single();
-
-            if (tokenError || !tokenData) {
-                msgDiv.innerText = "❌ Connection failed. Try again.";
-                msgDiv.style.backgroundColor = "#ef4444";
-                return;
-            }
-
-            if (userCode !== tokenData.token) {
-                msgDiv.innerText = "❌ Code Expired or Invalid!";
-                msgDiv.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
-                msgDiv.style.color = "#ef4444";
-                return;
-            }
-
-            const { error: logError } = await supabase
-                .from('attendance_logs')
-                .insert({ student_id: cachedStudent.id, date: today, status: 'Present' });
-
-            if (logError) {
-                if (logError.code === "23505") { 
-                    msgDiv.innerText = "ℹ️ Already marked present for today!";
-                    msgDiv.style.backgroundColor = "rgba(16, 185, 129, 0.1)";
-                    msgDiv.style.color = "#10b981";
-                } else {
-                    msgDiv.innerText = "❌ Error: " + logError.message;
-                    msgDiv.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
+            try {
+                // Fetch valid open state parameter from session validation engine
+                const { data: session, error: sErr } = await supabase.from('session').select('*').eq('id', 1).single();
+                
+                if (sErr || !session || !session.is_open) {
+                    showStatus("❌ No active attendance registration running.", false);
+                    return;
                 }
-                return;
-            }
 
-            msgDiv.innerText = "🚀 Attendance Recorded!";
-            msgDiv.style.backgroundColor = "rgba(16, 185, 129, 0.2)";
-            msgDiv.style.color = "#10b981";
-            document.getElementById('passcode').value = "";
-        });
+                // Verify expiration time
+                if (new Date() > new Date(session.expires_at)) {
+                    showStatus("❌ Invalid or expired code", false);
+                    return;
+                }
+
+                if (session.active_token !== enteredToken) {
+                    showStatus("❌ Invalid code verification failure.", false);
+                    return;
+                }
+
+                // Attempt record capture with native multi-mutation prevention built into SQL constraints
+                const { error: aErr } = await supabase.from('attendance').insert([
+                    {
+                        student_id: profile.student_id,
+                        name: profile.name,
+                        status: 'Present'
+                    }
+                ]);
+
+                if (aErr) {
+                    if (aErr.code === '23505') { // Postgres code for duplicate unique mapping block
+                        showStatus("⚠️ Attendance already verified for today.", true);
+                    } else {
+                        showStatus("❌ Transaction Failure: " + aErr.message, false);
+                    }
+                } else {
+                    showStatus("✅ Attendance marked successfully!", true);
+                }
+
+            } catch (err) {
+                showStatus("Network execution failure context.", false);
+            }
+        }
+
+        function showStatus(msg, isSuccess) {
+            const statusBox = document.getElementById("statusMsg");
+            statusBox.classList.remove("hidden");
+            statusBox.innerText = msg;
+            if (isSuccess) {
+                statusBox.classList.add("bg-green-500/20", "text-green-400", "border", "border-green-500/30");
+            } else {
+                statusBox.classList.add("bg-red-500/20", "text-red-400", "border", "border-red-500/30");
+            }
+        }
+
+        function clearProfile() {
+            if(confirm("Reset registered setup context?")) {
+                localStorage.clear();
+                window.location.search = "";
+                initApp();
+            }
+        }
     </script>
 </body>
 </html>
-
