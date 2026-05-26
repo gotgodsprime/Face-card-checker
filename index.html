@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Portal</title>
+    <!-- Supabase JS Client library CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Force high contrast dark theme variables so phone settings can't override them */
+        /* Light/Dark high-contrast forced theme variables */
         :root {
             --bg-color: #0f172a !important;
             --card-bg: #1e293b !important;
             --text-main: #ffffff !important;
             --text-muted: #94a3b8 !important;
-            --border-color: #334155 !important;
+            --border-color: #475569 !important;
             --primary: #6366f1 !important;
             --success: #10b981 !important;
             --danger: #ef4444 !important;
@@ -30,9 +31,28 @@
             color: #ffffff !important; 
             padding: 20px; 
             display: flex; 
+            flex-direction: column;
             justify-content: center; 
             align-items: center; 
             min-height: 100vh; 
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* WARNING STATUS BANNER - VISIBLE IF NOT SET UP */
+        .config-warning {
+            background-color: #7f1d1d !important;
+            border: 2px solid #ef4444 !important;
+            color: #fca5a5 !important;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
 
         .card { 
@@ -41,8 +61,7 @@
             border-radius: 12px; 
             padding: 25px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
-            width: 100%; 
-            max-width: 400px; 
+            width: 100%;
         }
 
         h2 { 
@@ -140,51 +159,68 @@
 </head>
 <body>
 
-    <div class="card">
-        <div id="registerSection" class="hidden">
-            <h2>👋 Registration</h2>
-            <p class="subtitle">Enter your details. You will only do this once.</p>
-            <form id="registerForm">
-                <div class="form-group">
-                    <label>Student ID / Roll Number</label>
-                    <input type="text" id="regId" class="form-control" placeholder="e.g. STU101" required>
-                </div>
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="regName" class="form-control" placeholder="John Doe" required>
-                </div>
-                <div class="form-group">
-                    <label>Class / Course / Level</label>
-                    <input type="text" id="regCourse" class="form-control" placeholder="e.g. Level 200" required>
-                </div>
-                <button type="submit" class="btn btn-primary">💾 Save Profile to Device</button>
-            </form>
+    <div class="container">
+        <!-- Live Visual Verification Banner -->
+        <div id="setupWarning" class="config-warning hidden">
+            ⚠️ Warning: Supabase Credentials are not set up yet! Edit index.html to insert your database API keys.
         </div>
 
-        <div id="checkInSection" class="hidden">
-            <h2>📱 Attendance Portal</h2>
-            <p class="subtitle" id="dateDisplay"></p>
-            
-            <div class="welcome-badge">
-                Logged in as: <strong id="studentInfoDisplay">...</strong>
+        <div class="card">
+            <!-- PHASE 1: REGISTRATION SCREEN -->
+            <div id="registerSection" class="hidden">
+                <h2>👋 Registration</h2>
+                <p class="subtitle">Enter your details. You will only do this once.</p>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>Student ID / Roll Number</label>
+                        <input type="text" id="regId" class="form-control" placeholder="e.g. STU101" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="regName" class="form-control" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Class / Course / Level</label>
+                        <input type="text" id="regCourse" class="form-control" placeholder="e.g. Level 200" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 Save Profile to Device</button>
+                </form>
             </div>
 
-            <form id="checkInForm">
-                <div class="form-group">
-                    <label>Class Passcode</label>
-                    <input type="text" id="passcode" class="form-control" placeholder="Enter Code" maxlength="6" required style="font-size: 1.8rem; text-align: center; letter-spacing: 4px; font-weight: bold; text-transform: uppercase;">
+            <!-- PHASE 2: ATTENDANCE CHECK-IN SCREEN -->
+            <div id="checkInSection" class="hidden">
+                <h2>📱 Attendance Portal</h2>
+                <p class="subtitle" id="dateDisplay"></p>
+                
+                <div class="welcome-badge">
+                    Logged in as: <strong id="studentInfoDisplay">...</strong>
                 </div>
-                <button type="submit" class="btn btn-success">✅ Verify & Check In</button>
-            </form>
-            <div id="message" class="hidden"></div>
+
+                <form id="checkInForm">
+                    <div class="form-group">
+                        <label>Class Passcode</label>
+                        <input type="text" id="passcode" class="form-control" placeholder="Enter Code" maxlength="6" required style="font-size: 1.8rem; text-align: center; letter-spacing: 4px; font-weight: bold; text-transform: uppercase;">
+                    </div>
+                    <button type="submit" class="btn btn-success">✅ Verify & Check In</button>
+                </form>
+                <div id="message" class="hidden"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- 🔴 REMEMBER TO COPY YOUR CONFIGS HERE ---
+        // --- 🔴 REPLACE THESE WITH YOUR COPIED CONFIGS FROM SUPABASE ---
         const SUPABASE_URL = "YOUR_SUPABASE_URL";
         const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let supabase = null;
+
+        // Check if configuration placeholders have been customized
+        if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
+            supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            document.getElementById('setupWarning').classList.remove('hidden');
+        }
 
         let cachedStudent = JSON.parse(localStorage.getItem('my_attendance_profile'));
 
@@ -216,6 +252,11 @@
             const name = document.getElementById('regName').value.trim();
             const course = document.getElementById('regCourse').value.trim();
 
+            if (!supabase) {
+                alert("Cannot connect to Database. Please enter real Supabase credentials first!");
+                return;
+            }
+
             const { error } = await supabase
                 .from('students')
                 .upsert({ id, name, course }, { onConflict: 'id' });
@@ -240,6 +281,12 @@
             msgDiv.classList.remove('hidden');
             msgDiv.style.color = "white";
             msgDiv.innerText = "Checking validation token...";
+
+            if (!supabase) {
+                msgDiv.innerText = "❌ Connection failed. Supabase is not configured.";
+                msgDiv.style.backgroundColor = "#ef4444";
+                return;
+            }
 
             const { data: tokenData, error: tokenError } = await supabase
                 .from('security_tokens')
@@ -284,3 +331,4 @@
     </script>
 </body>
 </html>
+
