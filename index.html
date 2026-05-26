@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Anti-Cheat QR Attendance System</title>
+    <title>Hybrid Anti-Cheat Attendance System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -40,9 +40,10 @@
         .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
         
         .hidden { display: none !important; }
-        #qrModal { text-align: center; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #sessionModal { text-align: center; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #qrcode { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; border: 4px solid var(--primary); }
 
+        .big-code { font-size: 3.5rem; font-weight: 800; color: #10b981; letter-spacing: 5px; margin: 15px 0; background: #1e293b; padding: 10px 30px; border-radius: 10px; display: inline-block; }
         .timer-box { font-size: 1.2rem; font-weight: bold; color: var(--warning); margin-bottom: 10px; background: #1e293b; padding: 8px 16px; border-radius: 20px; display: inline-block;}
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 25px; }
@@ -69,15 +70,22 @@
 
     <div class="container">
         <div id="studentView" class="card hidden" style="max-width: 500px; margin: 40px auto;">
-            <h2 style="text-align: center; margin-bottom: 10px;">📱 Student Attendance Check-In</h2>
+            <h2 style="text-align: center; margin-bottom: 10px;">📱 Student Attendance Portal</h2>
             <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px;" id="studentDateDisplay"></p>
             
             <form id="studentCheckInForm">
                 <div class="form-group">
-                    <label for="checkInId">Enter Your Student ID / Roll Number</label>
-                    <input type="text" id="checkInId" class="form-control" placeholder="e.g. STU101" required style="font-size: 1.2rem; text-align: center;">
+                    <label for="checkInId">Your Student ID / Roll Number</label>
+                    <input type="text" id="checkInId" class="form-control" placeholder="e.g. STU101" required style="font-size: 1.2rem; text-align: center; margin-bottom: 15px;">
                 </div>
-                <button type="submit" class="btn btn-success" style="width: 100%; font-size: 1.1rem; padding: 14px;">Verify & Mark Me Present ✅</button>
+                
+                <div class="form-group">
+                    <label for="checkInCode">Enter Active 4-Digit Classroom Code</label>
+                    <input type="text" id="checkInCode" class="form-control" placeholder="0000" maxlength="4" required style="font-size: 1.5rem; text-align: center; letter-spacing: 4px; font-weight: bold;">
+                    <small style="color: var(--text-muted); display: block; text-align: center; margin-top: 5px;">Get this code from the projector screen, chalkboard, or lecturer.</small>
+                </div>
+                
+                <button type="submit" class="btn btn-success" style="width: 100%; font-size: 1.1rem; padding: 14px; margin-top: 10px;">Verify & Mark Attendance ✅</button>
             </form>
             <p id="checkInMessage" style="text-align: center; margin-top: 15px; font-weight: bold; font-size: 1.1rem;"></p>
         </div>
@@ -85,8 +93,8 @@
         <div id="teacherView">
             <header>
                 <div>
-                    <h1>🛡️ Anti-Cheat Attendance Dashboard</h1>
-                    <p style="color: var(--text-muted);">QR Codes dynamically cycle every 15 seconds to prevent photo-sharing sharing.</p>
+                    <h1>⚡ Hybrid Attendance Dashboard (Dumsor-Proof)</h1>
+                    <p style="color: var(--text-muted);">Switch easily between Dynamic QR codes or verbal 4-digit codes if the power goes out.</p>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <input type="date" id="datePicker" style="padding: 8px; border-radius: 6px;">
@@ -94,22 +102,31 @@
                 </div>
             </header>
 
-            <div class="card" style="background: linear-gradient(135deg, #4f46e5, #06b6d4); color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div class="card" style="background: linear-gradient(135deg, #4f46e5, #0f172a); color: white; display: flex; flex-direction: column; gap: 15px;">
                 <div>
-                    <h2>Ready to take attendance?</h2>
-                    <p style="opacity: 0.9;">Opens the dynamic rolling secure QR window.</p>
+                    <h2>Select Attendance Method for Today:</h2>
+                    <p style="opacity: 0.9; margin-top: 4px;">Choose QR if the projector is active, or use Verbal Code if there is no electricity.</p>
                 </div>
-                <button class="btn" style="background: white; color: var(--primary);" onclick="startLiveQR()">📢 Open Anti-Cheat Projector</button>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn" style="background: #10b981; color: white;" onclick="startSession('qr')">🖼️ Method A: Start Dynamic QR</button>
+                    <button class="btn" style="background: #f59e0b; color: white;" onclick="startSession('code')">🗣️ Method B: Start Verbal One-Time Code</button>
+                </div>
             </div>
 
-            <div id="qrModal" class="card hidden">
-                <h2>🔒 Secure Dynamic Check-In</h2>
-                <p style="color: var(--text-muted); margin-bottom: 10px;">This code changes automatically. Photos texted to friends will instantly fail.</p>
+            <div id="sessionModal" class="card hidden">
+                <h2 id="sessionTitle">🔒 Active Security Session</h2>
+                <p id="sessionDesc" style="color: var(--text-muted); margin-bottom: 10px;"></p>
                 
-                <div class="timer-box">⏳ Code updates in: <span id="countdown">15</span>s</div>
+                <div class="timer-box">⏳ Changes automatically in: <span id="countdown">30</span>s</div>
                 
-                <div id="qrcode"></div>
-                <button class="btn btn-danger" onclick="stopLiveQR()">❌ Close & Lock Attendance</button>
+                <div id="verbalCodeContainer" class="hidden">
+                    <div class="big-code" id="activeVerbalCode">0000</div>
+                    <p style="font-weight: 500;">Write this number on the board or say it out loud!</p>
+                </div>
+
+                <div id="qrcode" class="hidden"></div>
+                
+                <button class="btn btn-danger" onclick="stopSession()" style="margin-top: 20px;">❌ Close & Lock Attendance</button>
             </div>
 
             <section class="stats-grid">
@@ -125,7 +142,7 @@
                     <form id="studentForm">
                         <div class="form-group"><label>Student ID</label><input type="text" id="studentId" class="form-control" required placeholder="STU101"></div>
                         <div class="form-group"><label>Full Name</label><input type="text" id="studentName" class="form-control" required placeholder="Jane Doe"></div>
-                        <div class="form-group"><label>Class/Course</label><input type="text" id="studentCourse" class="form-control" required placeholder="BSc. Computer Science"></div>
+                        <div class="form-group"><label>Class/Course</label><input type="text" id="studentCourse" class="form-control" required placeholder="Level 100"></div>
                         <button type="submit" class="btn btn-primary" style="width: 100%;">➕ Register Student</button>
                     </form>
                 </section>
@@ -147,16 +164,16 @@
     </div>
 
     <script>
-        let students = JSON.parse(localStorage.getItem('anti_students')) || [];
-        let attendanceData = JSON.parse(localStorage.getItem('anti_attendance')) || {};
+        let students = JSON.parse(localStorage.getItem('hybrid_students')) || [];
+        let attendanceData = JSON.parse(localStorage.getItem('hybrid_attendance')) || {};
 
         const datePicker = document.getElementById('datePicker');
         const rosterBody = document.getElementById('rosterBody');
         
-        let qrInterval = null;
+        let sessionInterval = null;
         let countdownInterval = null;
-        let currentSecretToken = ""; 
-        const TOKEN_LIFESPAN = 15; // Set dynamic intervals to refresh every 15 seconds
+        let activeSessionType = ""; // 'qr' or 'code'
+        const REFRESH_RATE = 30; // Code updates every 30 seconds to give students time to type it
 
         window.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T');
@@ -167,6 +184,11 @@
             if (urlParams.get('role') === 'student') {
                 document.getElementById('teacherView').classList.add('hidden');
                 document.getElementById('studentView').classList.remove('hidden');
+                
+                // Automatically fill out the code field if it was passed via QR code URL
+                if(urlParams.get('token')) {
+                    document.getElementById('checkInCode').value = urlParams.get('token');
+                }
             } else {
                 renderDashboard();
             }
@@ -183,19 +205,20 @@
 
             if (students.some(s => s.id === id)) return alert("ID already exists!");
             students.push({ id, name, course });
-            localStorage.setItem('anti_students', JSON.stringify(students));
+            localStorage.setItem('hybrid_students', JSON.stringify(students));
             document.getElementById('studentForm').reset();
             renderDashboard();
         });
 
-        // Anti-Cheat Check-In Logic
+        // Student Self-Check-In Verification Logic
         document.getElementById('studentCheckInForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const inputId = document.getElementById('checkInId').value.trim();
+            const inputCode = document.getElementById('checkInCode').value.trim();
             const msg = document.getElementById('checkInMessage');
             const today = new Date().toISOString().split('T');
 
-            // 1. Validate if student profile is registered
+            // 1. Verify student exists
             const studentExists = students.some(s => s.id === inputId);
             if (!studentExists) {
                 msg.style.color = "var(--danger)";
@@ -203,72 +226,81 @@
                 return;
             }
 
-            // 2. ANTI-CHEAT TOKEN VERIFICATION STEP:
-            // Extract the security token currently active from the URL parameter strings
-            const urlParams = new URLSearchParams(window.location.search);
-            const studentSubmittedToken = urlParams.get('token');
-            const systemActiveToken = localStorage.getItem('active_attendance_token');
-
-            if (!studentSubmittedToken || studentSubmittedToken !== systemActiveToken) {
+            // 2. Anti-Cheat Session Check
+            const currentSystemActiveToken = localStorage.getItem('active_attendance_token');
+            if (!currentSystemActiveToken || inputCode !== currentSystemActiveToken) {
                 msg.style.color = "var(--danger)";
-                msg.innerText = "❌ Session Expired! The QR code changed. Look up at the board and scan the fresh code.";
+                msg.innerText = "❌ Invalid or Expired Code! Check the board for the new code.";
                 return;
             }
 
-            // Successfully Verified
+            // Successfully Marked Present
             if (!attendanceData[today]) attendanceData[today] = {};
             attendanceData[today][inputId] = "Present";
-            localStorage.setItem('anti_attendance', JSON.stringify(attendanceData));
+            localStorage.setItem('hybrid_attendance', JSON.stringify(attendanceData));
 
             msg.style.color = "var(--success)";
-            msg.innerText = "✅ Verified & Checked In Successfully!";
+            msg.innerText = "✅ Attendance Verified Successfully!";
             document.getElementById('studentCheckInForm').reset();
         });
 
-        // Generator Token Automation loops
-        function generateNextQR() {
-            // Create a randomized token string
-            currentSecretToken = Math.random().toString(36).substring(2, 15);
-            // Save token globally to local storage so student tabs can match instantly against live metrics
-            localStorage.setItem('active_attendance_token', currentSecretToken);
+        // Core Session Loops (Handles both QR and Verbal Numbers)
+        function updateSessionCycle() {
+            let activeToken = "";
 
-            // Establish the explicit dynamic routing link path
-            const baseUrl = window.location.href.split('?');
-            const dynamicSecureUrl = `${baseUrl}?role=student&token=${currentSecretToken}`;
+            if (activeSessionType === 'code') {
+                // Generate random 4-digit code number string
+                activeToken = Math.floor(1000 + Math.random() * 9000).toString();
+                document.getElementById('activeVerbalCode').innerText = activeToken;
+            } else if (activeSessionType === 'qr') {
+                // Generate a random string token for the QR URL parameter
+                activeToken = Math.random().toString(36).substring(2, 6).toUpperCase();
+                const baseUrl = window.location.href.split('?');
+                const studentLink = `${baseUrl}?role=student&token=${activeToken}`;
+                
+                document.getElementById('qrcode').innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), { text: studentLink, width: 250, height: 250 });
+            }
 
-            document.getElementById('qrcode').innerHTML = ""; // Clear existing
-            new QRCode(document.getElementById("qrcode"), {
-                text: dynamicSecureUrl,
-                width: 280,
-                height: 280
-            });
+            // Save active session token to local storage
+            localStorage.setItem('active_attendance_token', activeToken);
         }
 
-        function startLiveQR() {
-            document.getElementById('qrModal').classList.remove('hidden');
-            generateNextQR();
+        function startSession(type) {
+            activeSessionType = type;
+            document.getElementById('sessionModal').classList.remove('hidden');
+            
+            if (type === 'code') {
+                document.getElementById('sessionTitle').innerText = "🗣️ Verbal One-Time Code Active";
+                document.getElementById('sessionDesc').innerText = "Announce or write the number below on the chalkboard.";
+                document.getElementById('verbalCodeContainer').classList.remove('hidden');
+                document.getElementById('qrcode').classList.add('hidden');
+            } else {
+                document.getElementById('sessionTitle').innerText = "🖼️ Dynamic QR Code Screen Active";
+                document.getElementById('sessionDesc').innerText = "Project this screen or place your laptop forward for scanning.";
+                document.getElementById('qrcode').classList.remove('hidden');
+                document.getElementById('verbalCodeContainer').classList.add('hidden');
+            }
 
-            let timeLeft = TOKEN_LIFESPAN;
+            updateSessionCycle();
+
+            let timeLeft = REFRESH_RATE;
             document.getElementById('countdown').innerText = timeLeft;
 
-            // Handle the 1-second countdown tickers UI text
             countdownInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById('countdown').innerText = timeLeft;
-                if (timeLeft <= 0) timeLeft = TOKEN_LIFESPAN;
+                if (timeLeft <= 0) timeLeft = REFRESH_RATE;
             }, 1000);
 
-            // Handle the 15-second generation swaps loops
-            qrInterval = setInterval(() => {
-                generateNextQR();
-            }, TOKEN_LIFESPAN * 1000);
+            sessionInterval = setInterval(updateSessionCycle, REFRESH_RATE * 1000);
         }
 
-        function stopLiveQR() {
-            clearInterval(qrInterval);
+        function stopSession() {
+            clearInterval(sessionInterval);
             clearInterval(countdownInterval);
-            localStorage.removeItem('active_attendance_token'); // Wipe valid passes completely
-            document.getElementById('qrModal').classList.add('hidden');
+            localStorage.removeItem('active_attendance_token');
+            document.getElementById('sessionModal').classList.add('hidden');
             renderDashboard();
         }
 
