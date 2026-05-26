@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Attendance Dashboard</title>
+    <title>QR Class Attendance System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        /* --- CSS VARIABLES (Light Mode Default) --- */
         :root {
             --bg-color: #f4f6f9;
             --card-bg: #ffffff;
@@ -18,552 +18,296 @@
             --success-light: #d1fae5;
             --danger: #ef4444;
             --danger-light: #fee2e2;
-            --warning: #f59e0b;
             --radius: 12px;
-            --transition: all 0.3s ease;
         }
 
-        /* --- DARK MODE VARIABLES --- */
         [data-theme="dark"] {
             --bg-color: #0f172a;
             --card-bg: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border-color: #334155;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
             --success-light: rgba(16, 185, 129, 0.2);
             --danger-light: rgba(239, 68, 68, 0.2);
         }
 
-        /* --- BASE STYLES --- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; transition: background 0.3s; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        
+        /* Modals & Special Views */
+        .hidden { display: none !important; }
+        #qrModal { text-align: center; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #qrcode { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            transition: var(--transition);
-            padding: 20px;
-            line-height: 1.5;
-        }
+        /* Dashboard & Layouts */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 15px; text-align: center; }
+        .app-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        @media (min-width: 900px) { .app-grid { grid-template-columns: 350px 1fr; } }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        /* Forms & Inputs */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-color); color: var(--text-main); }
+        
+        /* Buttons */
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-secondary { background: var(--text-muted); color: white; }
 
-        /* --- HEADER & CONTROLS --- */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        input[type="date"] {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background: var(--card-bg);
-            color: var(--text-main);
-            font-weight: 600;
-        }
-
-        .btn-theme {
-            background: none;
-            border: 1px solid var(--border-color);
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            color: var(--text-main);
-            background-color: var(--card-bg);
-        }
-
-        /* --- APP GRID LAYOUT --- */
-        .app-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-        }
-
-        @media (min-width: 900px) {
-            .app-grid {
-                grid-template-columns: 350px 1fr;
-            }
-        }
-
-        /* --- CARD STYLES --- */
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: var(--transition);
-        }
-
-        .card h2 {
-            margin-bottom: 15px;
-            font-size: 1.25rem;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 8px;
-        }
-
-        /* --- DASHBOARD STATS --- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .stat-card p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .stat-card h3 {
-            font-size: 1.8rem;
-            margin-top: 5px;
-        }
-
-        /* --- FORMS & INPUTS --- */
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-        }
-
-        /* --- BUTTONS --- */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            width: 100%;
-        }
-
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-success { background-color: var(--success); color: white; }
-        .btn-danger { background-color: var(--danger); color: white; }
-        .btn-secondary { background-color: var(--text-muted); color: white; }
-
-        .bulk-actions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        .bulk-actions .btn { width: auto; flex: 1; font-size: 0.9rem;}
-
-        /* --- FILTERS & SEARCH --- */
-        .filter-bar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .search-box { flex: 2; min-width: 200px; }
-        .filter-box { flex: 1; min-width: 120px; }
-
-        /* --- TABLE STYLES --- */
-        .table-responsive {
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            background: var(--card-bg);
-        }
-
-        th, td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            background-color: var(--bg-color);
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        /* --- ATTENDANCE ROW STATES --- */
-        tr.status-present {
-            background-color: var(--success-light) !important;
-        }
-        tr.status-absent {
-            background-color: var(--danger-light) !important;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 8px;
-        }
-
-        .action-btns button {
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .action-btns button:hover { transform: scale(1.05); }
-
-        .btn-p-action.active-p { background-color: var(--success); color: white; border-color: var(--success); }
-        .btn-a-action.active-a { background-color: var(--danger); color: white; border-color: var(--danger); }
-
-        /* Smooth Row Animations */
-        tr { transition: background-color 0.25s ease; }
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 15px; }
+        th, td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+        tr.status-present { background-color: var(--success-light); }
+        tr.status-absent { background-color: var(--danger-light); }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <header>
-            <div>
-                <h1>📊 Class Attendance</h1>
-                <p style="color: var(--text-muted);">Manage your daily student logs</p>
-            </div>
-            <div class="header-actions">
-                <input type="date" id="datePicker">
-                <button class="btn-theme" id="themeToggle" onclick="toggleTheme()">🌓 Theme</button>
-            </div>
-        </header>
-
-        <section class="stats-grid">
-            <div class="stat-card">
-                <p>Total Students</p>
-                <h3 id="statTotal">0</h3>
-            </div>
-            <div class="stat-card" style="border-left: 4px solid var(--success);">
-                <p>Present Today</p>
-                <h3 id="statPresent" style="color: var(--success);">0</h3>
-            </div>
-            <div class="stat-card" style="border-left: 4px solid var(--danger);">
-                <p>Absent Today</p>
-                <h3 id="statAbsent" style="color: var(--danger);">0</h3>
-            </div>
-            <div class="stat-card" style="border-left: 4px solid var(--warning);">
-                <p>Attendance Rate</p>
-                <h3 id="statRate">0%</h3>
-            </div>
-        </section>
-
-        <main class="app-grid">
-            
-            <section class="card">
-                <h2>Add New Student</h2>
-                <form id="studentForm">
-                    <div class="form-group">
-                        <label for="studentName">Full Name</label>
-                        <input type="text" id="studentName" class="form-control" placeholder="John Doe" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="studentId">Student ID / Roll No.</label>
-                        <input type="text" id="studentId" class="form-control" placeholder="STU101" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="studentCourse">Course / Class</label>
-                        <input type="text" id="studentCourse" class="form-control" placeholder="Computer Science A" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">➕ Add Student</button>
-                </form>
-            </section>
-
-            <section class="card">
-                <h2>Attendance Roster</h2>
-                
-                <div class="bulk-actions">
-                    <button class="btn btn-success" onclick="markAll('Present')">✅ Mark All Present</button>
-                    <button class="btn btn-secondary" onclick="resetTodayAttendance()">🔄 Reset Statuses</button>
-                    <button class="btn btn-primary" onclick="exportCSV()" style="background-color: #0284c7;">📥 Export CSV</button>
+        <div id="studentView" class="card hidden" style="max-width: 500px; margin: 40px auto;">
+            <h2 style="text-align: center; margin-bottom: 10px;">📱 Student Attendance Check-In</h2>
+            <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px;" id="studentDateDisplay"></p>
+            <form id="studentCheckInForm">
+                <div class="form-group">
+                    <label for="checkInId">Enter Your Student ID / Roll Number</label>
+                    <input type="text" id="checkInId" class="form-control" placeholder="e.g. STU101" required style="font-size: 1.2rem; text-align: center;">
                 </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; font-size: 1.1rem; padding: 14px;">Verify & Mark Me Present ✅</button>
+            </form>
+            <p id="checkInMessage" style="text-align: center; margin-top: 15px; font-weight: bold;"></p>
+        </div>
 
-                <div class="filter-bar">
-                    <input type="text" id="searchBox" class="form-control search-box" placeholder="🔍 Search by name or ID..." oninput="renderRoster()">
-                    <select id="filterStatus" class="form-control filter-box" onchange="renderRoster()">
-                        <option value="all">All Records</option>
-                        <option value="Present">Present Only</option>
-                        <option value="Absent">Absent Only</option>
-                        <option value="unmarked">Unmarked</option>
-                    </select>
+        <div id="teacherView">
+            <header>
+                <div>
+                    <h1>📊 Smart QR Attendance Dashboard</h1>
+                    <p style="color: var(--text-muted);">Project the QR code for instant, nameless tracking</p>
                 </div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="date" id="datePicker" style="padding: 8px; border-radius: 6px;">
+                    <button class="btn btn-secondary" onclick="toggleTheme()">🌓 Theme</button>
+                </div>
+            </header>
 
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Class/Course</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rosterBody">
-                            </tbody>
-                    </table>
+            <div class="card" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h2>Ready for class?</h2>
+                    <p style="opacity: 0.9;">Click to project the check-in QR code onto the classroom screen.</p>
+                </div>
+                <button class="btn" style="background: white; color: var(--primary);" onclick="showQRCode()">📢 Open QR Code Projector</button>
+            </div>
+
+            <div id="qrModal" class="card hidden">
+                <h2>📲 Scan to Mark Attendance</h2>
+                <p style="color: var(--text-muted);">Open your smartphone camera and scan the code below.</p>
+                <div id="qrcode"></div>
+                <button class="btn btn-danger" onclick="hideQRCode()">❌ Close Projector Screen</button>
+            </div>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <p>Total Class Roster</p>
+                    <h3 id="statTotal">0</h3>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid var(--success);">
+                    <p>Present Today</p>
+                    <h3 id="statPresent" style="color: var(--success);">0</h3>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid var(--danger);">
+                    <p>Absent / Unmarked</p>
+                    <h3 id="statAbsent" style="color: var(--danger);">0</h3>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid var(--primary);">
+                    <p>Attendance Rate</p>
+                    <h3 id="statRate">0%</h3>
                 </div>
             </section>
-        </main>
+
+            <main class="app-grid">
+                <section class="card">
+                    <h2>Add Student to Database</h2>
+                    <form id="studentForm">
+                        <div class="form-group"><label>Student ID</label><input type="text" id="studentId" class="form-control" required placeholder="STU101"></div>
+                        <div class="form-group"><label>Full Name</label><input type="text" id="studentName" class="form-control" required placeholder="Jane Doe"></div>
+                        <div class="form-group"><label>Class/Course</label><input type="text" id="studentCourse" class="form-control" required placeholder="BSc. Computer Science"></div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">➕ Register Student</button>
+                    </form>
+                </section>
+
+                <section class="card">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                        <h2>Live Attendance Logs</h2>
+                        <button class="btn btn-secondary" onclick="exportCSV()" style="background: #0284c7;">📥 Export CSV</button>
+                    </div>
+                    
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr><th>ID</th><th>Name</th><th>Course</th><th>Status</th></tr>
+                            </thead>
+                            <tbody id="rosterBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
 
     <script>
-        // --- APPLICATION STATE ---
-        let students = JSON.parse(localStorage.getItem('students')) || [];
-        let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || {}; 
-        // Structure of attendanceData: { "YYYY-MM-DD": { "StudentID": "Present" / "Absent" } }
+        // Data Management
+        let students = JSON.parse(localStorage.getItem('qr_students')) || [];
+        let attendanceData = JSON.parse(localStorage.getItem('qr_attendance')) || {};
 
-        // --- DOM ELEMENTS ---
         const datePicker = document.getElementById('datePicker');
-        const studentForm = document.getElementById('studentForm');
         const rosterBody = document.getElementById('rosterBody');
 
-        // --- INITIALIZATION ---
         window.addEventListener('DOMContentLoaded', () => {
-            // Set default date to today's date local format (YYYY-MM-DD)
             const today = new Date().toISOString().split('T');
             datePicker.value = today;
-            
-            // Set up application views
-            renderRoster();
+            document.getElementById('studentDateDisplay').innerText = `Date: ${today}`;
 
-            // Listen for date switches
-            datePicker.addEventListener('change', () => {
-                renderRoster();
-            });
+            // SMART ROUTING: Check if the user is a student scanning the code
+            // If the URL has "?role=student", it shifts directly into the student terminal form view
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('role') === 'student') {
+                document.getElementById('teacherView').classList.add('hidden');
+                document.getElementById('studentView').classList.remove('hidden');
+            } else {
+                renderDashboard();
+            }
+
+            datePicker.addEventListener('change', renderDashboard);
         });
 
-        // --- STUDENT REGISTRATION ---
-        studentForm.addEventListener('submit', (e) => {
+        // Add Students
+        document.getElementById('studentForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            
             const id = document.getElementById('studentId').value.trim();
             const name = document.getElementById('studentName').value.trim();
             const course = document.getElementById('studentCourse').value.trim();
 
-            // Prevent duplicate Student IDs
-            if (students.some(student => student.id === id)) {
-                alert("A student with this ID already exists!");
+            if (students.some(s => s.id === id)) return alert("ID already exists!");
+
+            students.push({ id, name, course });
+            localStorage.setItem('qr_students', JSON.stringify(students));
+            document.getElementById('studentForm').reset();
+            renderDashboard();
+        });
+
+        // Student Self-Check-in Handling
+        document.getElementById('studentCheckInForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputId = document.getElementById('checkInId').value.trim();
+            const today = new Date().toISOString().split('T');
+
+            // Verify if student exists in database
+            const studentExists = students.some(s => s.id === inputId);
+
+            if (!studentExists) {
+                const msg = document.getElementById('checkInMessage');
+                msg.style.color = "var(--danger)";
+                msg.innerText = "❌ ID not found in Class Database! Contact your Teacher.";
                 return;
             }
 
-            // Create and push student
-            students.push({ id, name, course });
-            saveToLocalStorage();
+            // Mark attendance
+            if (!attendanceData[today]) attendanceData[today] = {};
+            attendanceData[today][inputId] = "Present";
             
-            // Reset form fields
-            studentForm.reset();
-            renderRoster();
+            localStorage.setItem('qr_attendance', JSON.stringify(attendanceData));
+
+            const msg = document.getElementById('checkInMessage');
+            msg.style.color = "var(--success)";
+            msg.innerText = "✅ Checked In Successfully! You can close this screen.";
+            document.getElementById('studentCheckInForm').reset();
         });
 
-        // --- ATTENDANCE SYSTEM MECHANICS ---
-        function markAttendance(studentId, status) {
-            const selectedDate = datePicker.value;
-
-            // Initialize date node if empty
-            if (!attendanceData[selectedDate]) {
-                attendanceData[selectedDate] = {};
-            }
-
-            // Toggle or set status
-            attendanceData[selectedDate][studentId] = status;
-            
-            saveToLocalStorage();
-            renderRoster();
-        }
-
-        function markAll(status) {
-            const selectedDate = datePicker.value;
-            if (students.length === 0) return;
-
-            if (!attendanceData[selectedDate]) attendanceData[selectedDate] = {};
-
-            students.forEach(student => {
-                attendanceData[selectedDate][student.id] = status;
-            });
-
-            saveToLocalStorage();
-            renderRoster();
-        }
-
-        function resetTodayAttendance() {
-            const selectedDate = datePicker.value;
-            if (attendanceData[selectedDate]) {
-                delete attendanceData[selectedDate];
-                saveToLocalStorage();
-                renderRoster();
-            }
-        }
-
-        // --- CORE RENDERING ENGINE & FILTERING ---
-        function renderRoster() {
-            const selectedDate = datePicker.value;
-            const searchQuery = document.getElementById('searchBox').value.toLowerCase();
-            const filterValue = document.getElementById('filterStatus').value;
-            
+        // Render Dashboard Metrics and Table
+        function renderDashboard() {
+            const date = datePicker.value;
             rosterBody.innerHTML = '';
-            
-            const dailyLogs = attendanceData[selectedDate] || {};
+            const dailyLogs = attendanceData[date] || {};
 
-            // Statistics counters
-            let countPresent = 0;
-            let countAbsent = 0;
+            let presentCount = 0;
 
             students.forEach(student => {
-                const status = dailyLogs[student.id] || 'unmarked';
+                const isPresent = dailyLogs[student.id] === 'Present';
+                if (isPresent) presentCount++;
 
-                // Real-time metrics calculations
-                if (status === 'Present') countPresent++;
-                if (status === 'Absent') countAbsent++;
+                const row = document.createElement('tr');
+                if (isPresent) row.classList.add('status-present');
 
-                // Filter logic
-                const matchesSearch = student.name.toLowerCase().includes(searchQuery) || student.id.toLowerCase().includes(searchQuery);
-                const matchesFilter = filterValue === 'all' || 
-                                      (filterValue === 'Present' && status === 'Present') || 
-                                      (filterValue === 'Absent' && status === 'Absent') ||
-                                      (filterValue === 'unmarked' && status === 'unmarked');
-
-                if (matchesSearch && matchesFilter) {
-                    const row = document.createElement('tr');
-                    
-                    // Assign highlight styling classes based on tracking status
-                    if (status === 'Present') row.classList.add('status-present');
-                    if (status === 'Absent') row.classList.add('status-absent');
-
-                    row.innerHTML = `
-                        <td><strong>${student.id}</strong></td>
-                        <td>${student.name}</td>
-                        <td>${student.course}</td>
-                        <td>
-                            <div class="action-btns">
-                                <button class="btn-p-action ${status === 'Present' ? 'active-p' : ''}" 
-                                    onclick="markAttendance('${student.id}', 'Present')" title="Mark Present">✅</button>
-                                <button class="btn-a-action ${status === 'Absent' ? 'active-a' : ''}" 
-                                    onclick="markAttendance('${student.id}', 'Absent')" title="Mark Absent">❌</button>
-                            </div>
-                        </td>
-                    `;
-                    rosterBody.appendChild(row);
-                }
+                row.innerHTML = `
+                    <td><strong>${student.id}</strong></td>
+                    <td>${student.name}</td>
+                    <td>${student.course}</td>
+                    <td>${isPresent ? '✅ Present' : '⏳ Unmarked / Absent'}</td>
+                `;
+                rosterBody.appendChild(row);
             });
 
-            updateDashboard(students.length, countPresent, countAbsent);
-        }
+            // Update Statistics counters
+            const total = students.length;
+            const absent = total - presentCount;
+            const rate = total > 0 ? Math.round((presentCount / total) * 100) : 0;
 
-        // --- UPDATE METRICS VIEW ---
-        function updateDashboard(total, present, absent) {
             document.getElementById('statTotal').innerText = total;
-            document.getElementById('statPresent').innerText = present;
+            document.getElementById('statPresent').innerText = presentCount;
             document.getElementById('statAbsent').innerText = absent;
-            
-            const rate = total > 0 ? Math.round((present / total) * 100) : 0;
             document.getElementById('statRate').innerText = `${rate}%`;
         }
 
-        // --- LOCAL STORAGE MANAGER ---
-        function saveToLocalStorage() {
-            localStorage.setItem('students', JSON.stringify(students));
-            localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+        // QR Code Generator Logic
+        let qrcodeInstance = null;
+        function showQRCode() {
+            document.getElementById('qrModal').classList.remove('hidden');
+            
+            // Generate link pointing back to this exact system file but routing to student form view
+            const studentUrl = window.location.href.split('?') + "?role=student";
+            
+            document.getElementById('qrcode').innerHTML = ""; // Clear existing
+            qrcodeInstance = new QRCode(document.getElementById("qrcode"), {
+                text: studentUrl,
+                width: 250,
+                height: 250
+            });
         }
 
-        // --- EXPORT TO EXCEL COMPATIBLE CSV ---
+        function hideQRCode() {
+            document.getElementById('qrModal').classList.add('hidden');
+            renderDashboard(); // Refresh background data logs instantly
+        }
+
         function exportCSV() {
-            const selectedDate = datePicker.value;
-            const dailyLogs = attendanceData[selectedDate] || {};
-
-            if (students.length === 0) {
-                alert("No student data available to export.");
-                return;
-            }
-
-            // CSV Content Header array
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += `Attendance Report for Date: ${selectedDate}\n`;
-            csvContent += "Student ID,Student Name,Class/Course,Attendance Status\n";
-
-            // Process dynamic row mapping
-            students.forEach(student => {
-                const status = dailyLogs[student.id] || 'Unmarked';
-                csvContent += `"${student.id}","${student.name}","${student.course}","${status}"\n`;
+            const date = datePicker.value;
+            const dailyLogs = attendanceData[date] || {};
+            let csv = "data:text/csv;charset=utf-8,Student ID,Name,Course,Status\n";
+            
+            students.forEach(s => {
+                const status = dailyLogs[s.id] === 'Present' ? 'Present' : 'Absent';
+                csv += `"${s.id}","${s.name}","${s.course}","${status}"\n`;
             });
 
-            // Browser virtual trigger to download raw data blob
-            const encodedUri = encodeURI(csvContent);
+            const encodedUri = encodeURI(csv);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Attendance_${selectedDate}.csv`);
+            link.setAttribute("download", `Attendance_${date}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // --- TOGGLE INTERFACE CUSTOM THEMES ---
         function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            if (currentTheme === 'dark') {
-                document.documentElement.removeAttribute('data-theme');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
+            const current = document.documentElement.getAttribute('data-theme');
+            if (current === 'dark') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
 </body>
