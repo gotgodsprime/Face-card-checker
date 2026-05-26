@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Data Collection System</title>
+    <style>
+        /* --- CSS VARIABLES & THEME (Modern Dark Mode) --- */
+        :root {
+            --bg-primary: #121214;
+            --bg-surface: #1a1a1e;
+            --bg-input: #26262b;
+            --text-main: #f0f0f5;
+            --text-muted: #a0a0aa;
+            --accent: #6366f1; /* Indigo */
+            --accent-hover: #4f46e5;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #10b981;
+            --success-hover: #059669;
+            --border-radius: 8px;
+            --transition: all 0.2s ease;
+        }
+
+        /* --- BASE STYLES --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        /* --- CARD / UTILITY STYLES --- */
+        .card {
+            background-color: var(--bg-surface);
+            padding: 1.75rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #2e2e35;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- FORM STYLES --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input {
+            background-color: var(--bg-input);
+            border: 1px solid #3f3f46;
+            color: var(--text-main);
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary { background-color: var(--accent); color: white; }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-success:hover { background-color: var(--success-hover); }
+
+        .btn-small {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* --- CONTROLS SECTION (Search & Export) --- */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        /* --- TABLE STYLES --- */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: var(--bg-input);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 1rem;
+            border-bottom: 2px solid #2e2e35;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #2e2e35;
+            color: var(--text-main);
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .no-data {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+        }
+
+        /* --- GROUPING SECTION --- */
+        .group-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .group-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .group-card {
+            background-color: var(--bg-input);
+            border: 1px solid #3f3f46;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+        }
+
+        .group-card h4 {
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid #3f3f46;
+            padding-bottom: 0.25rem;
+        }
+
+        .group-card ul {
+            list-style: none;
+        }
+
+        .group-card li {
+            font-size: 0.9rem;
+            padding: 0.25rem 0;
+            color: var(--text-main);
+        }
+
+        /* --- RESPONSIVE BREAKPOINTS --- */
+        @media (max-width: 600px) {
+            body { padding: 1rem 0.5rem; }
+            .card { padding: 1.25rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .controls-row { flex-direction: column; align-items: stretch; }
+            .search-box { width: 100%; }
+            .action-btns { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header>
+            <h1>Student Database Hub</h1>
+            <p>Manage records, search entries, and generate project groups effortlessly.</p>
+        </header>
+
+        <section class="card">
+            <h2 style="margin-bottom: 1.2rem;">Add New Student</h2>
+            <form id="studentForm" class="form-grid" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="editId">
+                
+                <div class="form-group">
+                    <label for="studentName">Student Name *</label>
+                    <input type="text" id="studentName" placeholder="e.g. John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentId">Student ID *</label>
+                    <input type="text" id="studentId" placeholder="e.g. GCTU-1234" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentCourse">Course / Class (Optional)</label>
+                    <input type="text" id="studentCourse" placeholder="e.g. IT, Computer Science">
+                </div>
+                <div>
+                    <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%;">Add Student</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="controls-row">
+                <input type="text" id="searchBar" class="search-box" placeholder="Search by name or ID..." oninput="renderStudents()">
+                <button onclick="exportToCSV()" class="btn btn-success">
+                    Download CSV
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th style="width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 style="margin-bottom: 1rem;">Group Generator</h2>
+            <div class="group-controls">
+                <label for="groupSize">Students per group:</label>
+                <input type="number" id="groupSize" value="3" min="2" max="10" style="width: 80px; padding: 0.5rem;">
+                <button onclick="generateGroups()" class="btn btn-primary btn-small">Generate Groups</button>
+            </div>
+            <div id="groupContainer" class="group-grid">
+                </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Global Array initialized with localStorage data or empty array if none exists
+        let students = JSON.parse(localStorage.getItem('students')) || [];
+
+        // DOM elements cache
+        const studentForm = document.getElementById('studentForm');
+        const studentName = document.getElementById('studentName');
+        const studentId = document.getElementById('studentId');
+        const studentCourse = document.getElementById('studentCourse');
+        const editId = document.getElementById('editId');
+        const submitBtn = document.getElementById('submitBtn');
+        const studentTableBody = document.getElementById('studentTableBody');
+        const searchBar = document.getElementById('searchBar');
+        const groupSizeInput = document.getElementById('groupSize');
+        const groupContainer = document.getElementById('groupContainer');
+
+        // --- CORE FUNCTIONS ---
+
+        // Helper: Save current state to LocalStorage
+        function saveToStorage() {
+            localStorage.setItem('students', JSON.stringify(students));
+        }
+
+        // Handles both Create and Update operations
+        function handleFormSubmit(event) {
+            event.preventDefault(); // Prevent standard page reload
+
+            const nameValue = studentName.value.trim();
+            const idValue = studentId.value.trim();
+            const courseValue = studentCourse.value.trim() || 'N/A';
+            const currentEditId = editId.value;
+
+            if (!nameValue || !idValue) return alert('Please fill in all required fields.');
+
+            if (currentEditId) {
+                // Update Mode
+                const index = students.findIndex(s => s.id === currentEditId);
+                if (index !== -1) {
+                    students[index] = { id: idValue, name: nameValue, course: courseValue };
+                }
+                submitBtn.innerText = 'Add Student';
+                editId.value = ''; // Clear edit tracking flag
+                studentId.disabled = false; // Re-enable ID field input
+            } else {
+                // Create Mode: Check for duplicate IDs before adding
+                if (students.some(s => s.id === idValue)) {
+                    return alert('A student with this ID already exists!');
+                }
+                students.push({ id: idValue, name: nameValue, course: courseValue });
+            }
+
+            saveToStorage();
+            studentForm.reset();
+            renderStudents();
+        }
+
+        // Render Student records based on list array and potential search terms
+        function renderStudents() {
+            const searchTerm = searchBar.value.toLowerCase();
+            studentTableBody.innerHTML = '';
+
+            // Filter system matching ID or Name
+            const filteredStudents = students.filter(student => 
+                student.name.toLowerCase().includes(searchTerm) || 
+                student.id.toLowerCase().includes(searchTerm)
+            );
+
+            if (filteredStudents.length === 0) {
+                studentTableBody.innerHTML = `<tr><td colspan="4" class="no-data">No student records found.</td></tr>`;
+                return;
+            }
+
+            filteredStudents.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${student.id}</strong></td>
+                    <td>${student.name}</td>
+                    <td>${student.course}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button onclick="editStudent('${student.id}')" class="btn btn-primary btn-small">Edit</button>
+                            <button onclick="deleteStudent('${student.id}')" class="btn btn-danger btn-small">Delete</button>
+                        </div>
+                    </td>
+                `;
+                studentTableBody.appendChild(row);
+            });
+        }
+
+        // Setup the form to edit an existing student entry
+        function editStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+
+            studentName.value = student.name;
+            studentId.value = student.id;
+            studentCourse.value = student.course === 'N/A' ? '' : student.course;
+            
+            editId.value = student.id; // Mark state as editing
+            studentId.disabled = true; // Lock down ID field during active modification
+            submitBtn.innerText = 'Update Student';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Remove a student record from the application array
+        function deleteStudent(id) {
+            if (confirm('Are you sure you want to remove this record?')) {
+                students = students.filter(student => student.id !== id);
+                saveToStorage();
+                renderStudents();
+            }
+        }
+
+        // --- BONUS FEATURES ---
+
+        // Random Grouping Engine (Fisher-Yates Shuffle Algorithm variant)
+        function generateGroups() {
+            groupContainer.innerHTML = '';
+            const size = parseInt(groupSizeInput.value);
+
+            if (students.length === 0) {
+                groupContainer.innerHTML = '<p class="no-data" style="grid-column: 1/-1;">Add students first to organize groups.</p>';
+                return;
+            }
+            if (size < 1) return alert('Please enter a valid group size.');
+
+            // Shallow clone array to avoid mutating original order array
+            let pool = [...students];
+            
+            // Randomize array order
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+
+            // Chunk sorted array into specific group sizes
+            let groupIndex = 1;
+            while (pool.length > 0) {
+                const chunk = pool.splice(0, size);
+                
+                const groupCard = document.createElement('div');
+                groupCard.className = 'group-card';
+                
+                let memberListHTML = chunk.map(s => `<li>• ${s.name} (${s.id})</li>`).join('');
+                
+                groupCard.innerHTML = `
+                    <h4>Group ${groupIndex}</h4>
+                    <ul>${memberListHTML}</ul>
+                `;
+                groupContainer.appendChild(groupCard);
+                groupIndex++;
+            }
+        }
+
+        // Export data to Standard Comma Separated Value (CSV) sheet format
+        function exportToCSV() {
+            if (students.length === 0) return alert('No records found to download.');
+
+            // Header mapping row arrays
+            let csvContent = "data:text/csv;charset=utf-8,Student ID,Student Name,Course\n";
+            
+            // Append formatted values row lines
+            students.forEach(s => {
+                // Escape quotes inside fields to prevent broken layout syntax strings
+                let cleanName = s.name.replace(/"/g, '""');
+                let cleanCourse = s.course.replace(/"/g, '""');
+                csvContent += `"${s.id}","${cleanName}","${cleanCourse}"\n`;
+            });
+
+            // Universal programmatic simulation download block
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `student_database_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link); // Required browser node mounting action
+
+            link.click(); // Dispatch dynamic download action execution
+            document.body.removeChild(link); // Housekeeping cleanup removal
+        }
+
+        // Initial setup sequence rendering execution
+        renderStudents();
+    </script>
+</body>
+</html>
