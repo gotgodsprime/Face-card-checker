@@ -267,8 +267,8 @@
                     <input type="text" id="studentId" placeholder="e.g. GCTU-1234" required>
                 </div>
                 <div class="form-group">
-                    <label for="studentCourse">Course / Class (Optional)</label>
-                    <input type="text" id="studentCourse" placeholder="e.g. IT, Computer Science">
+                    <label for="studentClass">Class (Optional)</label>
+                    <input type="text" id="studentClass" placeholder="e.g. Level 100, Class B">
                 </div>
                 <div>
                     <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%;">Add Student</button>
@@ -280,7 +280,7 @@
             <div class="controls-row">
                 <input type="text" id="searchBar" class="search-box" placeholder="Search by name or ID..." oninput="renderStudents()">
                 <button onclick="exportToCSV()" class="btn btn-success">
-                    Download CSV
+                    Download CSV 🔒
                 </button>
             </div>
 
@@ -290,7 +290,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Name</th>
-                            <th>Course</th>
+                            <th>Class</th>
                             <th style="width: 150px;">Actions</th>
                         </tr>
                     </thead>
@@ -301,7 +301,7 @@
         </section>
 
         <section class="card">
-            <h2 style="margin-bottom: 1rem;">Group Generator</h2>
+            <h2 style="margin-bottom: 1rem;">Group Generator 🔒</h2>
             <div class="group-controls">
                 <label for="groupSize">Students per group:</label>
                 <input type="number" id="groupSize" value="3" min="2" max="10" style="width: 80px; padding: 0.5rem;">
@@ -314,6 +314,9 @@
     </div>
 
     <script>
+        // --- CONFIGURATION ---
+        const ADMIN_PASSWORD = "admin123"; // Change this to your preferred admin key
+
         // Global Array initialized with localStorage data or empty array if none exists
         let students = JSON.parse(localStorage.getItem('students')) || [];
 
@@ -321,7 +324,7 @@
         const studentForm = document.getElementById('studentForm');
         const studentName = document.getElementById('studentName');
         const studentId = document.getElementById('studentId');
-        const studentCourse = document.getElementById('studentCourse');
+        const studentClass = document.getElementById('studentClass');
         const editId = document.getElementById('editId');
         const submitBtn = document.getElementById('submitBtn');
         const studentTableBody = document.getElementById('studentTableBody');
@@ -336,13 +339,25 @@
             localStorage.setItem('students', JSON.stringify(students));
         }
 
+        // Helper: Security check function
+        function authenticateAdmin() {
+            const input = prompt("Enter Admin Password to proceed:");
+            if (input === null) return false; // User pressed Cancel
+            if (input === ADMIN_PASSWORD) {
+                return true;
+            } else {
+                alert("Incorrect password. Access denied.");
+                return false;
+            }
+        }
+
         // Handles both Create and Update operations
         function handleFormSubmit(event) {
             event.preventDefault(); // Prevent standard page reload
 
             const nameValue = studentName.value.trim();
             const idValue = studentId.value.trim();
-            const courseValue = studentCourse.value.trim() || 'N/A';
+            const classValue = studentClass.value.trim() || 'N/A';
             const currentEditId = editId.value;
 
             if (!nameValue || !idValue) return alert('Please fill in all required fields.');
@@ -351,7 +366,7 @@
                 // Update Mode
                 const index = students.findIndex(s => s.id === currentEditId);
                 if (index !== -1) {
-                    students[index] = { id: idValue, name: nameValue, course: courseValue };
+                    students[index] = { id: idValue, name: nameValue, class: classValue };
                 }
                 submitBtn.innerText = 'Add Student';
                 editId.value = ''; // Clear edit tracking flag
@@ -361,7 +376,7 @@
                 if (students.some(s => s.id === idValue)) {
                     return alert('A student with this ID already exists!');
                 }
-                students.push({ id: idValue, name: nameValue, course: courseValue });
+                students.push({ id: idValue, name: nameValue, class: classValue });
             }
 
             saveToStorage();
@@ -390,7 +405,7 @@
                 row.innerHTML = `
                     <td><strong>${student.id}</strong></td>
                     <td>${student.name}</td>
-                    <td>${student.course}</td>
+                    <td>${student.class}</td>
                     <td>
                         <div class="action-btns">
                             <button onclick="editStudent('${student.id}')" class="btn btn-primary btn-small">Edit</button>
@@ -409,7 +424,7 @@
 
             studentName.value = student.name;
             studentId.value = student.id;
-            studentCourse.value = student.course === 'N/A' ? '' : student.course;
+            studentClass.value = student.class === 'N/A' ? '' : student.class;
             
             editId.value = student.id; // Mark state as editing
             studentId.disabled = true; // Lock down ID field during active modification
@@ -426,17 +441,21 @@
             }
         }
 
-        // --- BONUS FEATURES ---
+        // --- PROTECTED FEATURES ---
 
         // Random Grouping Engine (Fisher-Yates Shuffle Algorithm variant)
         function generateGroups() {
-            groupContainer.innerHTML = '';
-            const size = parseInt(groupSizeInput.value);
-
             if (students.length === 0) {
                 groupContainer.innerHTML = '<p class="no-data" style="grid-column: 1/-1;">Add students first to organize groups.</p>';
                 return;
             }
+
+            // Trigger password check before continuing
+            if (!authenticateAdmin()) return;
+
+            groupContainer.innerHTML = '';
+            const size = parseInt(groupSizeInput.value);
+
             if (size < 1) return alert('Please enter a valid group size.');
 
             // Shallow clone array to avoid mutating original order array
@@ -471,15 +490,18 @@
         function exportToCSV() {
             if (students.length === 0) return alert('No records found to download.');
 
+            // Trigger password check before continuing
+            if (!authenticateAdmin()) return;
+
             // Header mapping row arrays
-            let csvContent = "data:text/csv;charset=utf-8,Student ID,Student Name,Course\n";
+            let csvContent = "data:text/csv;charset=utf-8,Student ID,Student Name,Class\n";
             
             // Append formatted values row lines
             students.forEach(s => {
                 // Escape quotes inside fields to prevent broken layout syntax strings
                 let cleanName = s.name.replace(/"/g, '""');
-                let cleanCourse = s.course.replace(/"/g, '""');
-                csvContent += `"${s.id}","${cleanName}","${cleanCourse}"\n`;
+                let cleanClass = s.class.replace(/"/g, '""');
+                csvContent += `"${s.id}","${cleanName}","${cleanClass}"\n`;
             });
 
             // Universal programmatic simulation download block
