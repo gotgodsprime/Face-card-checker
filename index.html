@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Class Attendance System</title>
+    <title>Secure Anti-Cheat QR Attendance System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -18,6 +18,7 @@
             --success-light: #d1fae5;
             --danger: #ef4444;
             --danger-light: #fee2e2;
+            --warning: #f59e0b;
             --radius: 12px;
         }
 
@@ -38,34 +39,30 @@
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
         .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
         
-        /* Modals & Special Views */
         .hidden { display: none !important; }
         #qrModal { text-align: center; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #qrcode { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; }
+        #qrcode { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; border: 4px solid var(--primary); }
 
-        /* Dashboard & Layouts */
+        .timer-box { font-size: 1.2rem; font-weight: bold; color: var(--warning); margin-bottom: 10px; background: #1e293b; padding: 8px 16px; border-radius: 20px; display: inline-block;}
+
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 15px; text-align: center; }
         .app-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
         @media (min-width: 900px) { .app-grid { grid-template-columns: 350px 1fr; } }
 
-        /* Forms & Inputs */
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
         .form-control { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-color); color: var(--text-main); }
         
-        /* Buttons */
         .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-secondary { background: var(--text-muted); color: white; }
 
-        /* Tables */
         table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 15px; }
         th, td { padding: 12px; border-bottom: 1px solid var(--border-color); }
         tr.status-present { background-color: var(--success-light); }
-        tr.status-absent { background-color: var(--danger-light); }
     </style>
 </head>
 <body>
@@ -74,6 +71,7 @@
         <div id="studentView" class="card hidden" style="max-width: 500px; margin: 40px auto;">
             <h2 style="text-align: center; margin-bottom: 10px;">📱 Student Attendance Check-In</h2>
             <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px;" id="studentDateDisplay"></p>
+            
             <form id="studentCheckInForm">
                 <div class="form-group">
                     <label for="checkInId">Enter Your Student ID / Roll Number</label>
@@ -81,14 +79,14 @@
                 </div>
                 <button type="submit" class="btn btn-success" style="width: 100%; font-size: 1.1rem; padding: 14px;">Verify & Mark Me Present ✅</button>
             </form>
-            <p id="checkInMessage" style="text-align: center; margin-top: 15px; font-weight: bold;"></p>
+            <p id="checkInMessage" style="text-align: center; margin-top: 15px; font-weight: bold; font-size: 1.1rem;"></p>
         </div>
 
         <div id="teacherView">
             <header>
                 <div>
-                    <h1>📊 Smart QR Attendance Dashboard</h1>
-                    <p style="color: var(--text-muted);">Project the QR code for instant, nameless tracking</p>
+                    <h1>🛡️ Anti-Cheat Attendance Dashboard</h1>
+                    <p style="color: var(--text-muted);">QR Codes dynamically cycle every 15 seconds to prevent photo-sharing sharing.</p>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <input type="date" id="datePicker" style="padding: 8px; border-radius: 6px;">
@@ -96,38 +94,29 @@
                 </div>
             </header>
 
-            <div class="card" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div class="card" style="background: linear-gradient(135deg, #4f46e5, #06b6d4); color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
-                    <h2>Ready for class?</h2>
-                    <p style="opacity: 0.9;">Click to project the check-in QR code onto the classroom screen.</p>
+                    <h2>Ready to take attendance?</h2>
+                    <p style="opacity: 0.9;">Opens the dynamic rolling secure QR window.</p>
                 </div>
-                <button class="btn" style="background: white; color: var(--primary);" onclick="showQRCode()">📢 Open QR Code Projector</button>
+                <button class="btn" style="background: white; color: var(--primary);" onclick="startLiveQR()">📢 Open Anti-Cheat Projector</button>
             </div>
 
             <div id="qrModal" class="card hidden">
-                <h2>📲 Scan to Mark Attendance</h2>
-                <p style="color: var(--text-muted);">Open your smartphone camera and scan the code below.</p>
+                <h2>🔒 Secure Dynamic Check-In</h2>
+                <p style="color: var(--text-muted); margin-bottom: 10px;">This code changes automatically. Photos texted to friends will instantly fail.</p>
+                
+                <div class="timer-box">⏳ Code updates in: <span id="countdown">15</span>s</div>
+                
                 <div id="qrcode"></div>
-                <button class="btn btn-danger" onclick="hideQRCode()">❌ Close Projector Screen</button>
+                <button class="btn btn-danger" onclick="stopLiveQR()">❌ Close & Lock Attendance</button>
             </div>
 
             <section class="stats-grid">
-                <div class="stat-card">
-                    <p>Total Class Roster</p>
-                    <h3 id="statTotal">0</h3>
-                </div>
-                <div class="stat-card" style="border-left: 4px solid var(--success);">
-                    <p>Present Today</p>
-                    <h3 id="statPresent" style="color: var(--success);">0</h3>
-                </div>
-                <div class="stat-card" style="border-left: 4px solid var(--danger);">
-                    <p>Absent / Unmarked</p>
-                    <h3 id="statAbsent" style="color: var(--danger);">0</h3>
-                </div>
-                <div class="stat-card" style="border-left: 4px solid var(--primary);">
-                    <p>Attendance Rate</p>
-                    <h3 id="statRate">0%</h3>
-                </div>
+                <div class="stat-card"><p>Total Class Roster</p><h3 id="statTotal">0</h3></div>
+                <div class="stat-card" style="border-left: 4px solid var(--success);"><p>Present Today</p><h3 id="statPresent" style="color: var(--success);">0</h3></div>
+                <div class="stat-card" style="border-left: 4px solid var(--danger);"><p>Absent / Unmarked</p><h3 id="statAbsent" style="color: var(--danger);">0</h3></div>
+                <div class="stat-card" style="border-left: 4px solid var(--primary);"><p>Attendance Rate</p><h3 id="statRate">0%</h3></div>
             </section>
 
             <main class="app-grid">
@@ -146,12 +135,9 @@
                         <h2>Live Attendance Logs</h2>
                         <button class="btn btn-secondary" onclick="exportCSV()" style="background: #0284c7;">📥 Export CSV</button>
                     </div>
-                    
                     <div style="overflow-x: auto;">
                         <table>
-                            <thead>
-                                <tr><th>ID</th><th>Name</th><th>Course</th><th>Status</th></tr>
-                            </thead>
+                            <thead><tr><th>ID</th><th>Name</th><th>Course</th><th>Status</th></tr></thead>
                             <tbody id="rosterBody"></tbody>
                         </table>
                     </div>
@@ -161,20 +147,22 @@
     </div>
 
     <script>
-        // Data Management
-        let students = JSON.parse(localStorage.getItem('qr_students')) || [];
-        let attendanceData = JSON.parse(localStorage.getItem('qr_attendance')) || {};
+        let students = JSON.parse(localStorage.getItem('anti_students')) || [];
+        let attendanceData = JSON.parse(localStorage.getItem('anti_attendance')) || {};
 
         const datePicker = document.getElementById('datePicker');
         const rosterBody = document.getElementById('rosterBody');
+        
+        let qrInterval = null;
+        let countdownInterval = null;
+        let currentSecretToken = ""; 
+        const TOKEN_LIFESPAN = 15; // Set dynamic intervals to refresh every 15 seconds
 
         window.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T');
             datePicker.value = today;
             document.getElementById('studentDateDisplay').innerText = `Date: ${today}`;
 
-            // SMART ROUTING: Check if the user is a student scanning the code
-            // If the URL has "?role=student", it shifts directly into the student terminal form view
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('role') === 'student') {
                 document.getElementById('teacherView').classList.add('hidden');
@@ -186,7 +174,7 @@
             datePicker.addEventListener('change', renderDashboard);
         });
 
-        // Add Students
+        // Add Student logic
         document.getElementById('studentForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const id = document.getElementById('studentId').value.trim();
@@ -194,47 +182,100 @@
             const course = document.getElementById('studentCourse').value.trim();
 
             if (students.some(s => s.id === id)) return alert("ID already exists!");
-
             students.push({ id, name, course });
-            localStorage.setItem('qr_students', JSON.stringify(students));
+            localStorage.setItem('anti_students', JSON.stringify(students));
             document.getElementById('studentForm').reset();
             renderDashboard();
         });
 
-        // Student Self-Check-in Handling
+        // Anti-Cheat Check-In Logic
         document.getElementById('studentCheckInForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const inputId = document.getElementById('checkInId').value.trim();
+            const msg = document.getElementById('checkInMessage');
             const today = new Date().toISOString().split('T');
 
-            // Verify if student exists in database
+            // 1. Validate if student profile is registered
             const studentExists = students.some(s => s.id === inputId);
-
             if (!studentExists) {
-                const msg = document.getElementById('checkInMessage');
                 msg.style.color = "var(--danger)";
-                msg.innerText = "❌ ID not found in Class Database! Contact your Teacher.";
+                msg.innerText = "❌ ID not found in class database!";
                 return;
             }
 
-            // Mark attendance
+            // 2. ANTI-CHEAT TOKEN VERIFICATION STEP:
+            // Extract the security token currently active from the URL parameter strings
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentSubmittedToken = urlParams.get('token');
+            const systemActiveToken = localStorage.getItem('active_attendance_token');
+
+            if (!studentSubmittedToken || studentSubmittedToken !== systemActiveToken) {
+                msg.style.color = "var(--danger)";
+                msg.innerText = "❌ Session Expired! The QR code changed. Look up at the board and scan the fresh code.";
+                return;
+            }
+
+            // Successfully Verified
             if (!attendanceData[today]) attendanceData[today] = {};
             attendanceData[today][inputId] = "Present";
-            
-            localStorage.setItem('qr_attendance', JSON.stringify(attendanceData));
+            localStorage.setItem('anti_attendance', JSON.stringify(attendanceData));
 
-            const msg = document.getElementById('checkInMessage');
             msg.style.color = "var(--success)";
-            msg.innerText = "✅ Checked In Successfully! You can close this screen.";
+            msg.innerText = "✅ Verified & Checked In Successfully!";
             document.getElementById('studentCheckInForm').reset();
         });
 
-        // Render Dashboard Metrics and Table
+        // Generator Token Automation loops
+        function generateNextQR() {
+            // Create a randomized token string
+            currentSecretToken = Math.random().toString(36).substring(2, 15);
+            // Save token globally to local storage so student tabs can match instantly against live metrics
+            localStorage.setItem('active_attendance_token', currentSecretToken);
+
+            // Establish the explicit dynamic routing link path
+            const baseUrl = window.location.href.split('?');
+            const dynamicSecureUrl = `${baseUrl}?role=student&token=${currentSecretToken}`;
+
+            document.getElementById('qrcode').innerHTML = ""; // Clear existing
+            new QRCode(document.getElementById("qrcode"), {
+                text: dynamicSecureUrl,
+                width: 280,
+                height: 280
+            });
+        }
+
+        function startLiveQR() {
+            document.getElementById('qrModal').classList.remove('hidden');
+            generateNextQR();
+
+            let timeLeft = TOKEN_LIFESPAN;
+            document.getElementById('countdown').innerText = timeLeft;
+
+            // Handle the 1-second countdown tickers UI text
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('countdown').innerText = timeLeft;
+                if (timeLeft <= 0) timeLeft = TOKEN_LIFESPAN;
+            }, 1000);
+
+            // Handle the 15-second generation swaps loops
+            qrInterval = setInterval(() => {
+                generateNextQR();
+            }, TOKEN_LIFESPAN * 1000);
+        }
+
+        function stopLiveQR() {
+            clearInterval(qrInterval);
+            clearInterval(countdownInterval);
+            localStorage.removeItem('active_attendance_token'); // Wipe valid passes completely
+            document.getElementById('qrModal').classList.add('hidden');
+            renderDashboard();
+        }
+
         function renderDashboard() {
             const date = datePicker.value;
             rosterBody.innerHTML = '';
             const dailyLogs = attendanceData[date] || {};
-
             let presentCount = 0;
 
             students.forEach(student => {
@@ -248,56 +289,27 @@
                     <td><strong>${student.id}</strong></td>
                     <td>${student.name}</td>
                     <td>${student.course}</td>
-                    <td>${isPresent ? '✅ Present' : '⏳ Unmarked / Absent'}</td>
+                    <td>${isPresent ? '✅ Present' : '⏳ Absent / Unmarked'}</td>
                 `;
                 rosterBody.appendChild(row);
             });
 
-            // Update Statistics counters
             const total = students.length;
-            const absent = total - presentCount;
-            const rate = total > 0 ? Math.round((presentCount / total) * 100) : 0;
-
             document.getElementById('statTotal').innerText = total;
             document.getElementById('statPresent').innerText = presentCount;
-            document.getElementById('statAbsent').innerText = absent;
-            document.getElementById('statRate').innerText = `${rate}%`;
-        }
-
-        // QR Code Generator Logic
-        let qrcodeInstance = null;
-        function showQRCode() {
-            document.getElementById('qrModal').classList.remove('hidden');
-            
-            // Generate link pointing back to this exact system file but routing to student form view
-            const studentUrl = window.location.href.split('?') + "?role=student";
-            
-            document.getElementById('qrcode').innerHTML = ""; // Clear existing
-            qrcodeInstance = new QRCode(document.getElementById("qrcode"), {
-                text: studentUrl,
-                width: 250,
-                height: 250
-            });
-        }
-
-        function hideQRCode() {
-            document.getElementById('qrModal').classList.add('hidden');
-            renderDashboard(); // Refresh background data logs instantly
+            document.getElementById('statAbsent').innerText = total - presentCount;
+            document.getElementById('statRate').innerText = `${total > 0 ? Math.round((presentCount / total) * 100) : 0}%`;
         }
 
         function exportCSV() {
             const date = datePicker.value;
             const dailyLogs = attendanceData[date] || {};
             let csv = "data:text/csv;charset=utf-8,Student ID,Name,Course,Status\n";
-            
             students.forEach(s => {
-                const status = dailyLogs[s.id] === 'Present' ? 'Present' : 'Absent';
-                csv += `"${s.id}","${s.name}","${s.course}","${status}"\n`;
+                csv += `"${s.id}","${s.name}","${s.course}","${dailyLogs[s.id] === 'Present' ? 'Present' : 'Absent'}"\n`;
             });
-
-            const encodedUri = encodeURI(csv);
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            link.setAttribute("href", encodeURI(csv));
             link.setAttribute("download", `Attendance_${date}.csv`);
             document.body.appendChild(link);
             link.click();
