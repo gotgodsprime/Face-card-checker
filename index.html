@@ -3,247 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group F | ApexCheck Operational Matrix</title>
+    <title>Group F | ApexCheck Premium Adaptive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        body {
-            background-color: #0f172a !important;
-            color: #ffffff !important;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        /* Smooth OS-level transitions */
+        * {
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.3s ease;
         }
-        .card-bg { background-color: #1e293b !important; border: 1px solid #334155 !important; }
-        .input-bg { background-color: #0f172a !important; color: #ffffff !important; border: 2px solid #475569 !important; }
-        .input-bg:focus { border-color: #3b82f6 !important; outline: none; }
-        .text-white-force { color: #ffffff !important; }
-        #qrCanvasContainer img { margin: 0 auto; border: 8px solid white; border-radius: 8px; display: block; }
+
+        /* DEFAULT: LIGHT MODE (Frosted Ice Aesthetic) */
+        body {
+            background: radial-gradient(circle at 50% 0%, #f1f5f9 0%, #e2e8f0 70%);
+            background-color: #e2e8f0;
+            color: #0f172a;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.45) !important;
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.4) !important;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.06);
+        }
+        .glass-input {
+            background: rgba(255, 255, 255, 0.7) !important;
+            border: 1px solid rgba(15, 23, 42, 0.1) !important;
+            color: #0f172a !important;
+        }
+        .glass-input:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+            outline: none;
+        }
+        .theme-text-primary { color: #0f172a; }
+        .theme-text-muted { color: #475569; }
+        .theme-card-sub { background: rgba(15, 23, 42, 0.04); border: 1px solid rgba(15, 23, 42, 0.05); }
+
+        /* DARK MODE OVERRIDES (Obsidian Midnight Aesthetic) */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: radial-gradient(circle at 50% 0%, #1e293b 0%, #090d16 70%);
+                background-color: #090d16;
+                color: #f8fafc;
+            }
+            .glass-panel {
+                background: rgba(30, 41, 59, 0.45) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            }
+            .glass-input {
+                background: rgba(15, 23, 42, 0.6) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                color: #ffffff !important;
+            }
+            .glass-input:focus {
+                box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+            }
+            .theme-text-primary { color: #ffffff; }
+            .theme-text-muted { color: #94a3b8; }
+            .theme-card-sub { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.03); }
+        }
+
+        /* QR Adjustments */
+        #qrCanvasContainer img { 
+            margin: 0 auto; 
+            border: 12px solid #ffffff; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="min-h-screen pb-12 flex flex-col justify-between">
+<body class="min-h-screen flex flex-col justify-between selection:bg-blue-500/30">
 
-    <header class="border-b border-slate-700 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-4 py-3">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="bg-blue-600 p-2 rounded-lg text-white">
-                    <i class="fa-solid fa-layer-group text-xl"></i>
+    <header class="border-b border-black/5 dark:border-white/5 bg-white/20 dark:bg-slate-950/40 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-blue-600 to-indigo-500 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/20">
+                    <i class="fa-solid fa-compass text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold tracking-tight text-white-force">Group F | ApexCheck</h1>
-                    <p class="text-[10px] text-blue-400 font-semibold uppercase tracking-wider">Secure Lecture Verification System</p>
+                    <h1 class="text-base font-bold tracking-tight theme-text-primary">ApexCheck</h1>
+                    <p class="text-[9px] text-blue-500 dark:text-blue-400 font-bold uppercase tracking-widest">Group F • Spatial Verification</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-2">
-                <span id="networkStatusStatus" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Online
+                <span id="networkStatusStatus" class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-[11px] font-medium flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-400"></span> Online
                 </span>
-                <span id="sessionStatusBadge" class="bg-rose-500/10 text-rose-400 border border-rose-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-rose-500"></span> No Active Session
+                <span id="sessionStatusBadge" class="bg-black/5 dark:bg-white/5 theme-text-muted border border-black/5 dark:border-white/5 px-3 py-1 rounded-full text-[11px] font-medium flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500"></span> Idle
                 </span>
             </div>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+    <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-start">
         
-        <div class="flex justify-center mb-6 max-w-md mx-auto bg-slate-800 p-1 rounded-xl border border-slate-700">
-            <button id="tabStudent" onclick="switchTab('student')" class="flex-1 text-center py-2.5 rounded-lg font-semibold text-sm transition duration-150">
-                <i class="fa-solid fa-graduation-cap mr-1.5"></i> Student Portal
+        <div class="w-full max-w-sm mb-8 bg-black/5 dark:bg-slate-950/60 p-1 rounded-xl border border-black/5 dark:border-white/5 flex items-center shadow-inner">
+            <button id="tabStudent" onclick="switchTab('student')" class="flex-1 text-center py-2 rounded-lg font-semibold text-xs tracking-wide transition-all duration-300">
+                Student Portal
             </button>
-            <button id="tabTeacher" onclick="switchTab('teacher')" class="flex-1 text-center py-2.5 rounded-lg font-semibold text-sm transition duration-150">
-                <i class="fa-solid fa-chalkboard-teacher mr-1.5"></i> Instructor Board
+            <button id="tabTeacher" onclick="switchTab('teacher')" class="flex-1 text-center py-2 rounded-lg font-semibold text-xs tracking-wide transition-all duration-300">
+                Instructor Panel
             </button>
         </div>
 
-        <div id="notificationAlert" class="hidden max-w-md mx-auto mb-4 p-4 rounded-xl border flex items-start gap-3 transition-all duration-300">
+        <div id="notificationAlert" class="hidden w-full max-w-sm mb-6 p-4 rounded-2xl border flex items-start gap-3 glass-panel transform translate-y-2 transition-all duration-300">
             <div id="notifIcon" class="mt-0.5"></div>
             <div class="flex-grow">
-                <h4 id="notifTitle" class="font-bold text-sm text-white-force"></h4>
-                <p id="notifMsg" class="text-xs text-slate-300"></p>
+                <h4 id="notifTitle" class="font-bold text-xs theme-text-primary"></h4>
+                <p id="notifMsg" class="text-[11px] theme-text-muted mt-0.5"></p>
             </div>
         </div>
 
-        <div id="studentSection" class="max-w-md mx-auto space-y-6 transition-all">
-            <div id="registrationCard" class="card-bg p-6 rounded-2xl shadow-xl hidden">
+        <div id="studentSection" class="w-full max-w-sm space-y-6 transition-all duration-300">
+            
+            <div id="registrationCard" class="glass-panel p-6 rounded-3xl shadow-2xl hidden">
                 <div class="text-center mb-6">
-                    <h2 class="text-xl font-bold text-white-force">Create Your Profile</h2>
-                    <p class="text-slate-400 text-sm mt-1">Register your device profile below to continue.</p>
+                    <h2 class="text-lg font-bold theme-text-primary tracking-tight">Identity Registration</h2>
+                    <p class="theme-text-muted text-xs mt-1">Configure your permanent attendance device card profile.</p>
                 </div>
                 <form id="regForm" onsubmit="handleRegistration(event)">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Student ID / Index Number</label>
-                            <input type="text" id="regId" placeholder="e.g. 1102945" class="w-full input-bg p-3 rounded-lg text-sm text-white" required>
+                            <label class="block text-[10px] font-semibold theme-text-muted uppercase tracking-wider mb-1.5 ml-1">Index / Student ID</label>
+                            <input type="text" id="regId" placeholder="e.g. 1102945" class="w-full glass-input p-3.5 rounded-xl text-sm" required>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Full Name</label>
-                            <input type="text" id="regName" placeholder="e.g. Emmanuel Boakye" class="w-full input-bg p-3 rounded-lg text-sm text-white" required>
+                            <label class="block text-[10px] font-semibold theme-text-muted uppercase tracking-wider mb-1.5 ml-1">Your Full Name</label>
+                            <input type="text" id="regName" placeholder="e.g. Emmanuel Boakye" class="w-full glass-input p-3.5 rounded-xl text-sm" required>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Default Course Block</label>
-                            <select id="regCourse" class="w-full input-bg p-3 rounded-lg text-sm text-white bg-slate-950" required>
-                                <option value="" disabled selected>Select Course Alignment</option>
+                            <label class="block text-[10px] font-semibold theme-text-muted uppercase tracking-wider mb-1.5 ml-1">Allocated Unit</label>
+                            <select id="regCourse" class="w-full glass-input p-3.5 rounded-xl text-sm bg-slate-100 dark:bg-slate-900 appearance-none" required>
+                                <option value="" disabled selected>Choose alignment...</option>
                                 <option value="CS-101">Computer Science 101</option>
                                 <option value="ENG-204">Engineering Mathematics II</option>
                                 <option value="PHY-110">Applied Physics</option>
                                 <option value="MKT-301">Principles of Marketing</option>
                             </select>
                         </div>
-                        <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition mt-2">
-                            <i class="fa-solid fa-id-card mr-2"></i> Save Profile Data
+                        <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-bold text-xs rounded-xl tracking-wider uppercase transition shadow-lg shadow-blue-500/20 mt-2">
+                            Initialize Profile Card
                         </button>
                     </div>
                 </form>
             </div>
 
-            <div id="checkInCard" class="card-bg p-6 rounded-2xl shadow-xl hidden">
-                <div class="flex justify-between items-start border-b border-slate-700 pb-4 mb-6">
+            <div id="checkInCard" class="glass-panel p-6 rounded-3xl shadow-2xl hidden">
+                <div class="flex justify-between items-start border-b border-black/5 dark:border-white/5 pb-5 mb-6">
                     <div>
-                        <span class="bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border border-blue-500/20">Active Student Device</span>
-                        <h2 id="studentDisplayName" class="text-lg font-bold mt-2 text-white-force">---</h2>
-                        <div class="flex gap-4 mt-1">
-                            <span id="studentDisplayId" class="text-xs text-slate-400"><i class="fa-solid fa-hashtag mr-1"></i> ID: ---</span>
-                            <span id="studentDisplayCourse" class="text-xs text-slate-400"><i class="fa-solid fa-book mr-1"></i> Unit: ---</span>
+                        <span class="bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border border-blue-500/10">Device Authenticated</span>
+                        <h2 id="studentDisplayName" class="text-base font-bold mt-2 theme-text-primary tracking-tight">---</h2>
+                        <div class="flex gap-4 mt-1 theme-text-muted text-[11px]">
+                            <span id="studentDisplayId">ID: ---</span>
+                            <span id="studentDisplayCourse">Unit: ---</span>
                         </div>
                     </div>
-                    <button onclick="clearCachedProfile()" class="text-slate-400 hover:text-red-400 text-xs p-1">
-                        <i class="fa-solid fa-right-from-bracket"></i>
+                    <button onclick="clearCachedProfile()" class="text-slate-400 dark:text-slate-500 hover:text-rose-500 transition p-2 bg-black/5 dark:bg-white/5 rounded-xl" title="Reset Profile">
+                        <i class="fa-solid fa-power-off text-xs"></i>
                     </button>
                 </div>
 
                 <div class="text-center">
                     <form id="checkInForm" onsubmit="handleCheckInSubmit(event)">
-                        <div class="max-w-[240px] mx-auto mb-4">
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Verification PIN Code</label>
-                            <input type="text" id="passcodeField" maxlength="4" placeholder="0000" class="w-full input-bg tracking-[0.5em] text-center text-3xl font-bold py-4 rounded-xl text-white-force uppercase placeholder:text-slate-700" required>
+                        <div class="max-w-[200px] mx-auto mb-5">
+                            <label class="block text-[10px] font-semibold theme-text-muted uppercase tracking-widest mb-2.5">Session Code PIN</label>
+                            <input type="text" id="passcodeField" maxlength="4" placeholder="0000" class="w-full glass-input tracking-[0.6em] text-center text-4xl font-black py-4 rounded-2xl placeholder:text-slate-300 dark:placeholder:text-slate-800 uppercase" required>
                         </div>
-                        <button type="submit" id="checkInBtn" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition text-base">
-                            <i class="fa-solid fa-shield-halved mr-2"></i> Validate Presence
+                        <button type="submit" id="checkInBtn" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold rounded-xl tracking-wider uppercase text-xs transition shadow-lg shadow-emerald-500/20">
+                            Validate Entry Presence
                         </button>
                     </form>
                 </div>
             </div>
 
-            <div id="studentHistoryCard" class="card-bg p-5 rounded-2xl shadow-xl hidden">
-                <h3 class="font-bold text-sm text-white-force mb-3 border-b border-slate-700 pb-2">
-                    <i class="fa-solid fa-clock-rotate-left text-blue-400 mr-1.5"></i>Your Personal Attendance Logs
+            <div id="studentHistoryCard" class="glass-panel p-5 rounded-3xl shadow-xl hidden">
+                <h3 class="font-bold text-xs tracking-wider uppercase theme-text-muted mb-4 border-b border-black/5 dark:border-white/5 pb-2">
+                    Personal Stream Records
                 </h3>
-                <div class="max-h-[220px] overflow-y-auto space-y-2 pr-1" id="studentHistoryList">
-                    <p class="text-xs text-slate-500 text-center py-4">No historical logs parsed yet.</p>
+                <div class="max-h-[200px] overflow-y-auto space-y-2.5 pr-1 no-scrollbar" id="studentHistoryList">
+                    <p class="text-xs text-slate-500 text-center py-4">No records logged yet.</p>
                 </div>
             </div>
         </div>
 
-        <div id="teacherSection" class="hidden transition-all">
-            <div id="dashboardAuth" class="max-w-md mx-auto card-bg p-8 rounded-2xl shadow-xl text-center">
-                <div class="w-16 h-16 bg-blue-600/10 border border-blue-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-key text-blue-400 text-2xl"></i>
+        <div id="teacherSection" class="w-full max-w-4xl hidden transition-all duration-300">
+            <div id="dashboardAuth" class="max-w-sm mx-auto glass-panel p-8 rounded-3xl shadow-2xl text-center">
+                <div class="w-14 h-14 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400 shadow-inner">
+                    <i class="fa-solid fa-lock-open text-xl"></i>
                 </div>
-                <h2 class="text-xl font-bold text-white-force">Instructor Authentication</h2>
-                <p class="text-sm text-slate-400 mt-1 mb-6">Enter access credentials to open Group F console controls.</p>
-                <form id="authForm" onsubmit="verifyDashboardPIN(event)" class="max-w-[200px] mx-auto">
-                    <input type="password" id="adminPin" placeholder="••••" maxlength="4" class="w-full input-bg p-3 text-center text-2xl font-bold rounded-xl mb-4" required>
-                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">Verify Access Key</button>
+                <h2 class="text-base font-bold theme-text-primary tracking-tight">Security Credentials</h2>
+                <p class="text-xs theme-text-muted mt-1 mb-6">Input administrative code to view verification analytics.</p>
+                <form id="authForm" onsubmit="verifyDashboardPIN(event)" class="max-w-[160px] mx-auto">
+                    <input type="password" id="adminPin" placeholder="••••" maxlength="4" class="w-full glass-input p-3 text-center text-2xl font-black rounded-xl mb-4 tracking-widest" required>
+                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-bold text-xs rounded-xl tracking-wider uppercase transition shadow-lg shadow-blue-500/20">Authorize</button>
                 </form>
-                <p class="text-[11px] text-slate-500 mt-4">(Console PIN: <span class="text-slate-400 font-semibold">2026</span>)</p>
+                <p class="text-[10px] theme-text-muted mt-4">Console Access PIN: 2026</p>
             </div>
 
             <div id="dashboardMain" class="hidden space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="card-bg p-4 rounded-xl flex items-center gap-4">
-                        <div class="p-3 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl text-xl">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-4">
+                        <div class="p-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 rounded-xl text-lg"><i class="fa-solid fa-users"></i></div>
                         <div>
-                            <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Session Attendees</p>
-                            <h3 id="analyticsTotalAttendees" class="text-2xl font-black text-white-force">0</h3>
+                            <p class="text-[10px] theme-text-muted uppercase tracking-wider">Verified Present</p>
+                            <h3 id="analyticsTotalAttendees" class="text-xl font-black theme-text-primary mt-0.5">0</h3>
                         </div>
                     </div>
-                    <div class="card-bg p-4 rounded-xl flex items-center gap-4">
-                        <div class="p-3 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl text-xl">
-                            <i class="fa-solid fa-user-shield"></i>
-                        </div>
+                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-4">
+                        <div class="p-3 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-xl text-lg"><i class="fa-solid fa-triangle-exclamation"></i></div>
                         <div>
-                            <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Flagged Proxy Attempts</p>
-                            <h3 id="analyticsFlaggedCount" class="text-2xl font-black text-rose-400">0</h3>
+                            <p class="text-[10px] theme-text-muted uppercase tracking-wider">Proxy Warnings</p>
+                            <h3 id="analyticsFlaggedCount" class="text-xl font-black text-rose-500 mt-0.5">0</h3>
                         </div>
                     </div>
-                    <div class="card-bg p-4 rounded-xl flex items-center gap-4">
-                        <div class="p-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-xl">
-                            <i class="fa-solid fa-percent"></i>
-                        </div>
+                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-4">
+                        <div class="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-xl text-lg"><i class="fa-solid fa-shield-halved"></i></div>
                         <div>
-                            <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Security Cleared Ratio</p>
-                            <h3 id="analyticsIntegrityRate" class="text-2xl font-black text-emerald-400">100%</h3>
+                            <p class="text-[10px] theme-text-muted uppercase tracking-wider">Stream Cleared Ratio</p>
+                            <h3 id="analyticsIntegrityRate" class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">100%</h3>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     <div class="lg:col-span-5 space-y-6">
-                        <div class="card-bg p-6 rounded-2xl shadow-xl">
-                            <h3 class="font-bold text-base text-white-force border-b border-slate-700 pb-3 mb-4">
-                                <i class="fa-solid fa-clock-history text-blue-400 mr-2"></i>Session Lifecycle
-                            </h3>
+                        <div class="glass-panel p-6 rounded-3xl shadow-xl">
+                            <h3 class="font-bold text-xs uppercase tracking-wider theme-text-muted border-b border-black/5 dark:border-white/5 pb-3 mb-4">Lifecycle State</h3>
+                            
                             <div id="sessionSetupState">
-                                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Target Course Unit</label>
-                                <select id="sessionCourseSelect" class="w-full input-bg p-3 rounded-lg text-sm text-white bg-slate-950 mb-4">
+                                <label class="block text-[10px] font-semibold theme-text-muted uppercase tracking-wider mb-2 ml-1">Target Lecture Unit</label>
+                                <select id="sessionCourseSelect" class="w-full glass-input p-3.5 rounded-xl text-sm bg-slate-100 dark:bg-slate-900 mb-5 appearance-none">
                                     <option value="CS-101">Computer Science 101</option>
                                     <option value="ENG-204">Engineering Mathematics II</option>
                                     <option value="PHY-110">Applied Physics</option>
                                     <option value="MKT-301">Principles of Marketing</option>
                                 </select>
-                                <button id="initializeBtn" onclick="createNewLectureSession()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">
-                                    <i class="fa-solid fa-play mr-2"></i> Initialize Live Session
+                                <button id="initializeBtn" onclick="createNewLectureSession()" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs tracking-widest uppercase transition shadow-lg shadow-blue-500/20">
+                                    Launch Stream Session
                                 </button>
                             </div>
 
                             <div id="sessionActiveState" class="hidden space-y-4">
-                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center">
-                                    <span class="text-xs text-emerald-400 uppercase tracking-widest font-bold">Active Stream Target</span>
-                                    <h4 id="activeSessionCourseName" class="text-lg font-bold text-white-force mt-1">---</h4>
+                                <div class="theme-card-sub p-4 rounded-2xl text-center">
+                                    <span class="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-widest">Active Broadcasting Vector</span>
+                                    <h4 id="activeSessionCourseName" class="text-base font-bold theme-text-primary mt-1">---</h4>
                                 </div>
 
-                                <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center space-y-4">
+                                <div class="theme-card-sub rounded-2xl p-4 text-center space-y-5 shadow-inner">
                                     <div>
-                                        <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Live Verification Code</span>
-                                        <h1 id="livePinCodeDisplay" class="text-4xl font-black tracking-widest text-blue-400 mt-1">0000</h1>
+                                        <span class="text-[9px] uppercase font-bold tracking-widest theme-text-muted">Live Secure Access PIN</span>
+                                        <h1 id="livePinCodeDisplay" class="text-5xl font-black tracking-[0.2em] text-blue-600 dark:text-blue-400 mt-1.5 pl-[0.2em]">0000</h1>
                                     </div>
-                                    <div class="p-3 bg-white rounded-xl inline-block mx-auto">
+                                    <div class="p-3 bg-white rounded-2xl inline-block mx-auto transform transition hover:scale-105 duration-300">
                                         <div id="qrCanvasContainer"></div>
                                     </div>
-                                    <p class="text-[11px] text-slate-400">Have students point their phone camera at this QR code to log entry automatically.</p>
+                                    <p class="text-[10px] theme-text-muted max-w-xs mx-auto leading-relaxed">Students scanning the matrix link will bypass code input constraints automatically.</p>
                                 </div>
 
-                                <button onclick="terminateActiveSession()" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition">
-                                    <i class="fa-solid fa-stop mr-2"></i> Terminate Session Logs
+                                <button onclick="terminateActiveSession()" class="w-full py-3.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:text-rose-300 font-bold rounded-xl text-xs tracking-wider uppercase transition">
+                                    Seal Stream Logs
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="lg:col-span-7 card-bg p-6 rounded-2xl shadow-xl">
-                        <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4">
-                            <h3 class="font-bold text-base text-white-force">Session Attendance Roster</h3>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="border-b border-slate-700 text-xs text-slate-400 uppercase tracking-wider">
-                                        <th class="py-3 px-2">Student</th>
-                                        <th class="py-3 px-2">Metrics</th>
-                                        <th class="py-3 px-2 text-right">Time</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="attendanceLogBody" class="divide-y divide-slate-800 text-sm">
-                                    <tr id="emptyLogPlaceholder">
-                                        <td colspan="3" class="py-8 text-center text-slate-500 text-xs">No entries verified.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="lg:col-span-7 glass-panel p-6 rounded-3xl shadow-xl flex flex-col">
+                        <h3 class="font-bold text-xs uppercase tracking-wider theme-text-muted border-b border-black/5 dark:border-white/5 pb-3 mb-4">Stream Registry Feed</h3>
+                        <div class="max-h-[460px] overflow-y-auto no-scrollbar space-y-2.5" id="attendanceLogBody">
+                            <div id="emptyLogPlaceholder" class="py-12 text-center text-slate-400 text-xs">
+                                No cryptographic presence vectors parsed yet.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -265,6 +306,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             initializeSupabase();
             loadStudentProfile();
+            switchTab('student');
             syncActiveLectureSessionState();
             initializeNetworkListeners();
             detectUrlParams();
@@ -281,8 +323,8 @@
             window.addEventListener('online', handleNetworkReturnOnline);
             window.addEventListener('offline', () => {
                 const indicators = document.getElementById('networkStatusStatus');
-                indicators.className = "bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5";
-                indicators.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Offline Mode`;
+                indicators.className = "bg-amber-500/10 text-amber-600 border border-amber-500/20 px-3 py-1 rounded-full text-[11px] font-medium flex items-center gap-1.5";
+                indicators.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Local Node Offline`;
             });
             const savedQueue = localStorage.getItem('apex_offline_queue');
             if (savedQueue) offlineSyncQueue = JSON.parse(savedQueue);
@@ -290,8 +332,8 @@
 
         async function handleNetworkReturnOnline() {
             const indicators = document.getElementById('networkStatusStatus');
-            indicators.className = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5";
-            indicators.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Online`;
+            indicators.className = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-[11px] font-medium flex items-center gap-1.5";
+            indicators.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online`;
             if (offlineSyncQueue.length > 0) await flushOfflineQueue();
         }
 
@@ -307,7 +349,7 @@
                     await supabaseClient.from('attendance_logs').insert(cleanPayload);
                 } catch (e) { console.error(e); }
             }
-            showToast("Sync Finished", "Offline entries uploaded successfully.", "success");
+            showToast("Matrix Synchronized", "Stored local pipeline elements pushed to ledger.", "success");
             fetchStudentPersonalHistory();
         }
 
@@ -340,8 +382,8 @@
                 
                 if (data) {
                     activeSessionData = data;
-                    badge.className = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5";
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Active: ${data.course_id}`;
+                    badge.className = "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5";
+                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Sync: ${data.course_id}`;
                     
                     document.getElementById('sessionSetupState').classList.add('hidden');
                     document.getElementById('sessionActiveState').classList.remove('hidden');
@@ -355,8 +397,8 @@
                     loadAttendanceData();
                 } else {
                     activeSessionData = null;
-                    badge.className = "bg-rose-500/10 text-rose-400 border border-rose-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5";
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span> No Active Session`;
+                    badge.className = "bg-black/5 dark:bg-white/5 theme-text-muted border border-black/5 dark:border-white/5 px-3 py-1 rounded-full text-[11px] font-medium flex items-center gap-1.5";
+                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500"></span> Idle`;
                     document.getElementById('sessionSetupState').classList.remove('hidden');
                     document.getElementById('sessionActiveState').classList.add('hidden');
                 }
@@ -366,15 +408,13 @@
         function renderQRCodeCanvas(passcode) {
             const qrContainer = document.getElementById('qrCanvasContainer');
             qrContainer.innerHTML = '';
-            
-            // Build direct parameter injection link
             const deepLinkUrl = `${window.location.origin}${window.location.pathname}?token=${passcode}`;
             
             new QRCode(qrContainer, {
                 text: deepLinkUrl,
-                width: 180,
-                height: 180,
-                colorDark : "#0f172a",
+                width: 160,
+                height: 160,
+                colorDark : "#090d16",
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.H
             });
@@ -388,25 +428,18 @@
 
             btn.disabled = true;
             try {
-                // Clear any existing active flags safely
                 await supabaseClient.from('lecture_sessions').update({ is_active: false }).eq('is_active', true);
-                
-                // Update or write token string state row
                 const { error: tokenError } = await supabaseClient.from('security_tokens').upsert({ id: 'active_session', token: liveGeneratedPin });
                 
                 if (tokenError) {
-                    alert("Database Error: Could not save the security PIN. Make sure you executed the SQL script inside your Supabase dashboard editor panel.");
+                    alert("Execute SQL table maps before streaming targets.");
                     btn.disabled = false;
                     return;
                 }
 
                 await supabaseClient.from('lecture_sessions').insert({ course_id: targetCourse, is_active: true });
                 await syncActiveLectureSessionState();
-            } catch(e) { 
-                console.error(e); 
-            } finally {
-                btn.disabled = false;
-            }
+            } catch(e) { console.error(e); } finally { btn.disabled = false; }
         }
 
         async function terminateActiveSession() {
@@ -441,7 +474,7 @@
                 offlineSyncQueue.push(payload);
                 localStorage.setItem('apex_offline_queue', JSON.stringify(offlineSyncQueue));
                 document.getElementById('passcodeField').value = '';
-                showToast("Stored Offline", "Saved locally.", "info");
+                showToast("Local Node Capture", "Pipeline array held locally.", "info");
                 renderStudentHistoryUI([...offlineSyncQueue]);
                 return;
             }
@@ -450,14 +483,14 @@
             try {
                 const { data: tData } = await supabaseClient.from('security_tokens').select('token').eq('id', 'active_session').single();
                 if (tokenSubmitted !== tData.token.toUpperCase()) {
-                    showToast("Failed", "PIN entered is incorrect.", "error");
+                    showToast("Cryptographic Mismatch", "The authorization key vector parsed is invalid.", "error");
                     return;
                 }
 
                 const { error } = await supabaseClient.from('attendance_logs').insert(payload);
                 if (!error) {
                     document.getElementById('passcodeField').value = '';
-                    showToast("Success", "Presence logged securely.", "success");
+                    showToast("Presence Verified", "Identity token securely committed.", "success");
                     fetchStudentPersonalHistory();
                 }
             } catch (err) { console.error(err); }
@@ -484,7 +517,7 @@
             const combinedLogs = [...unsyncedItems, ...databaseRecords];
 
             if (combinedLogs.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No entries registered under this ID.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4 font-medium">No previous validation points discovered.</p>`;
                 return;
             }
 
@@ -492,13 +525,12 @@
             combinedLogs.forEach(log => {
                 const timeStr = new Date(log.checked_in_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 const div = document.createElement('div');
+                div.className = "p-3 rounded-2xl border flex justify-between items-center bg-white/20 dark:bg-slate-900/40 border-black/5 dark:border-white/5";
                 
                 if (log.pendingOffline) {
-                    div.className = "p-2.5 rounded-lg border text-xs flex justify-between items-center bg-amber-950/30 border-amber-500/30 text-amber-300 animate-pulse";
-                    div.innerHTML = `<div><p class="font-bold text-white-force">${log.course_id}</p><p class="text-[10px] text-amber-400">⏳ Unsynced Offline Log</p></div><span class="font-semibold">${timeStr}</span>`;
+                    div.innerHTML = `<div><p class="font-bold text-xs theme-text-primary">${log.course_id}</p><p class="text-[9px] text-amber-600 dark:text-amber-400 font-medium">⌛ Unsynced Pipeline Frame</p></div><span class="text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400">${timeStr}</span>`;
                 } else {
-                    div.className = `p-2.5 rounded-lg border text-xs flex justify-between items-center ${log.is_flagged_proxy ? 'bg-rose-950/20 border-rose-900/40 text-rose-300' : 'bg-slate-900/50 border-slate-800 text-slate-300'}`;
-                    div.innerHTML = `<div><p class="font-bold text-white-force">${log.course_id}</p><p class="text-[10px] text-slate-400">${log.check_in_date}</p></div><span class="font-semibold text-slate-400">${timeStr}</span>`;
+                    div.innerHTML = `<div><p class="font-bold text-xs theme-text-primary">${log.course_id}</p><p class="text-[9px] theme-text-muted">${log.check_in_date}</p></div><span class="text-[11px] font-mono font-bold theme-text-muted">${timeStr}</span>`;
                 }
                 container.appendChild(div);
             });
@@ -506,13 +538,13 @@
 
         async function loadAttendanceData() {
             if (!dashboardAuthenticated || !activeSessionData) return;
-            const logBody = document.getElementById('attendanceLogBody');
+            const logContainer = document.getElementById('attendanceLogBody');
 
             try {
                 const { data: records, error } = await supabaseClient.from('attendance_logs').select('*').eq('session_id', activeSessionData.id);
                 if (error) throw error;
 
-                logBody.querySelectorAll('tr:not(#emptyLogPlaceholder)').forEach(r => r.remove());
+                logContainer.querySelectorAll('.identity-node').forEach(node => node.remove());
                 const placeholder = document.getElementById('emptyLogPlaceholder');
                 
                 if (!records || records.length === 0) {
@@ -525,19 +557,28 @@
                 let flaggedCount = 0;
                 records.forEach(rec => {
                     if (rec.is_flagged_proxy) flaggedCount++;
-                    const row = document.createElement('tr');
-                    row.className = rec.is_flagged_proxy ? "bg-rose-950/30 border-b border-rose-900 text-rose-200" : "border-b border-slate-800 text-slate-300";
+                    const item = document.createElement('div');
+                    item.className = `identity-node p-3.5 rounded-2xl border flex items-center justify-between ${rec.is_flagged_proxy ? 'bg-rose-500/10 border-rose-500/20' : 'bg-white/30 dark:bg-slate-950/40 border-black/5 dark:border-white/5'}`;
                     const timeStr = new Date(rec.checked_in_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
-                    row.innerHTML = `
-                        <td class="py-3 px-2">
-                            <p class="font-bold text-white-force">${rec.student_name}</p>
-                            <p class="text-[10px] text-slate-400 font-mono">${rec.student_id}</p>
-                        </td>
-                        <td class="py-3 px-2 text-xs">${rec.is_flagged_proxy ? '⚠️ Flagged' : '✅ Clear'}</td>
-                        <td class="py-3 px-2 text-right text-xs font-semibold">${timeStr}</td>
+                    item.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${rec.is_flagged_proxy ? 'bg-rose-500/10 text-rose-500' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'}">
+                                ${rec.student_name.charAt(0)}
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold theme-text-primary tracking-tight">${rec.student_name}</p>
+                                <p class="text-[9px] font-mono theme-text-muted mt-0.5">${rec.student_id}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-mono font-bold block theme-text-muted">${timeStr}</span>
+                            <span class="text-[9px] uppercase font-bold tracking-wider mt-0.5 block ${rec.is_flagged_proxy ? 'text-rose-500' : 'text-emerald-600 dark:text-emerald-400'}">
+                                ${rec.is_flagged_proxy ? 'Proxy Risk' : 'Cleared'}
+                            </span>
+                        </div>
                     `;
-                    logBody.appendChild(row);
+                    logContainer.appendChild(item);
                 });
                 updateAnalyticsDashboard(records.length, flaggedCount);
             } catch(err) { console.error(err); }
@@ -556,13 +597,13 @@
             const tabTeacher = document.getElementById('tabTeacher');
             
             if (role === 'student') {
-                tabStudent.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm bg-blue-600 text-white-force";
-                tabTeacher.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm text-slate-400 hover:text-white";
+                tabStudent.className = "flex-1 text-center py-2.5 rounded-lg font-bold text-xs tracking-wide bg-white dark:bg-white/10 theme-text-primary shadow-sm border border-black/5 dark:border-white/5";
+                tabTeacher.className = "flex-1 text-center py-2.5 rounded-lg font-medium text-xs tracking-wide theme-text-muted hover:text-blue-500";
                 document.getElementById('studentSection').classList.remove('hidden');
                 document.getElementById('teacherSection').classList.add('hidden');
             } else {
-                tabTeacher.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm bg-blue-600 text-white-force";
-                tabStudent.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm text-slate-400 hover:text-white";
+                tabTeacher.className = "flex-1 text-center py-2.5 rounded-lg font-bold text-xs tracking-wide bg-white dark:bg-white/10 theme-text-primary shadow-sm border border-black/5 dark:border-white/5";
+                tabStudent.className = "flex-1 text-center py-2.5 rounded-lg font-medium text-xs tracking-wide theme-text-muted hover:text-blue-500";
                 document.getElementById('studentSection').classList.add('hidden');
                 document.getElementById('teacherSection').classList.remove('hidden');
                 if (dashboardAuthenticated) {
@@ -577,8 +618,8 @@
             if (cache) {
                 studentProfile = JSON.parse(cache);
                 document.getElementById('studentDisplayName').innerText = studentProfile.name;
-                document.getElementById('studentDisplayId').innerHTML = `<i class="fa-solid fa-hashtag mr-1"></i> ID: ${studentProfile.id}`;
-                document.getElementById('studentDisplayCourse').innerHTML = `<i class="fa-solid fa-book mr-1"></i> Unit: ${studentProfile.course}`;
+                document.getElementById('studentDisplayId').innerText = `ID: ${studentProfile.id}`;
+                document.getElementById('studentDisplayCourse').innerText = `Unit: ${studentProfile.course}`;
                 document.getElementById('registrationCard').classList.add('hidden');
                 document.getElementById('checkInCard').classList.remove('hidden');
                 document.getElementById('studentHistoryCard').classList.remove('hidden');
@@ -615,7 +656,7 @@
                 document.getElementById('dashboardMain').classList.remove('hidden');
                 loadAttendanceData();
                 syncActiveLectureSessionState();
-            } else { alert("Invalid PIN"); }
+            } else { alert("Invalid access attempt."); }
         }
 
         function showToast(title, msg, type = 'info') {
@@ -625,13 +666,13 @@
             document.getElementById('notifTitle').innerText = title;
             document.getElementById('notifMsg').innerText = msg;
             if (type === 'success') {
-                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-emerald-900/90 border-emerald-500/40 flex items-start gap-3 sticky top-16 z-50";
-                icon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>`;
+                notif.className = "w-full max-w-sm mb-6 p-4 rounded-2xl border flex items-start gap-3 bg-emerald-500/10 dark:bg-emerald-950/40 border-emerald-500/20 backdrop-blur-xl sticky top-20 z-50 shadow-xl";
+                icon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 dark:text-emerald-400 text-sm"></i>`;
             } else {
-                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-blue-900/90 border-blue-500/40 flex items-start gap-3 sticky top-16 z-50";
-                icon.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-lg"></i>`;
+                notif.className = "w-full max-w-sm mb-6 p-4 rounded-2xl border flex items-start gap-3 bg-blue-500/10 dark:bg-blue-950/40 border-blue-500/20 backdrop-blur-xl sticky top-20 z-50 shadow-xl";
+                icon.innerHTML = `<i class="fa-solid fa-circle-info text-blue-600 dark:text-blue-400 text-sm"></i>`;
             }
-            setTimeout(() => { notif.classList.add('hidden'); }, 5000);
+            setTimeout(() => { notif.classList.add('hidden'); }, 4000);
         }
 
         function detectUrlParams() {
@@ -639,7 +680,7 @@
             const token = urlParams.get('token');
             if (token) {
                 document.getElementById('passcodeField').value = token.toUpperCase();
-                showToast("QR Code Scanned", "Verification code automatically extracted and filled.", "success");
+                showToast("Deep Link Extracted", "Broadcasting matrix key auto-populated into input fields.", "success");
             }
         }
     </script>
