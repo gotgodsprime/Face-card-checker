@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group F | ApexCheck Attendance</title>
+    <title>Group F | ApexCheck Anti-Cheat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,22 +14,10 @@
             color: #ffffff !important;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
-        .card-bg {
-            background-color: #1e293b !important;
-            border: 1px solid #334155 !important;
-        }
-        .input-bg {
-            background-color: #0f172a !important;
-            color: #ffffff !important;
-            border: 2px solid #475569 !important;
-        }
-        .input-bg:focus {
-            border-color: #3b82f6 !important;
-            outline: none;
-        }
-        .text-white-force {
-            color: #ffffff !important;
-        }
+        .card-bg { background-color: #1e293b !important; border: 1px solid #334155 !important; }
+        .input-bg { background-color: #0f172a !important; color: #ffffff !important; border: 2px solid #475569 !important; }
+        .input-bg:focus { border-color: #3b82f6 !important; outline: none; }
+        .text-white-force { color: #ffffff !important; }
     </style>
 </head>
 <body class="min-h-screen pb-12 flex flex-col justify-between">
@@ -71,9 +59,6 @@
                 <h4 id="notifTitle" class="font-bold text-sm text-white-force"></h4>
                 <p id="notifMsg" class="text-xs text-slate-300"></p>
             </div>
-            <button onclick="dismissNotification()" class="text-slate-400 hover:text-white">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
         </div>
 
         <div id="studentSection" class="max-w-md mx-auto transition-all">
@@ -99,7 +84,7 @@
                                 <option value="" disabled selected>Select Course Alignment</option>
                                 <option value="CS-101">Computer Science 101</option>
                                 <option value="ENG-204">Engineering Mathematics II</option>
-                                *<option value="PHY-110">Applied Physics</option>
+                                <option value="PHY-110">Applied Physics</option>
                                 <option value="MKT-301">Principles of Marketing</option>
                             </select>
                         </div>
@@ -127,7 +112,7 @@
                 </div>
 
                 <div class="text-center">
-                    <p class="text-sm text-slate-300 mb-4">Enter the rolling verification token to declare presence.</p>
+                    <p class="text-sm text-slate-300 mb-4">Enter rolling verification token to declare presence.</p>
                     
                     <form id="checkInForm" onsubmit="handleCheckInSubmit(event)">
                         <div class="max-w-[240px] mx-auto mb-6">
@@ -135,9 +120,10 @@
                         </div>
 
                         <button type="submit" id="checkInBtn" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition text-base">
-                            <i class="fa-solid fa-circle-check mr-2"></i> Validate Presence
+                            <i class="fa-solid fa-shield-halved mr-2"></i> Validate Presence
                         </button>
                     </form>
+                    <p class="text-[10px] text-slate-500 mt-3"><i class="fa-solid fa-location-crosshairs mr-1"></i> GPS and browser anti-cheat validation active</p>
                 </div>
             </div>
         </div>
@@ -175,6 +161,25 @@
                                 <option value="PHY-110">Applied Physics</option>
                                 <option value="MKT-301">Principles of Marketing</option>
                             </select>
+                            
+                            <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 mb-4 space-y-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wide block"><i class="fa-solid fa-location-dot text-blue-400 mr-1"></i> Geofence Bounds</span>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <label class="text-slate-500 text-[10px]">LECTURE LATITUDE</label>
+                                        <input type="number" step="any" id="geoLatInput" value="5.6506" class="w-full bg-slate-950 text-white p-2 rounded border border-slate-700 mt-1">
+                                    </div>
+                                    <div>
+                                        <label class="text-slate-500 text-[10px]">LECTURE LONGITUDE</label>
+                                        <input type="number" step="any" id="geoLngInput" value="-0.1870" class="w-full bg-slate-950 text-white p-2 rounded border border-slate-700 mt-1">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-slate-500 text-[10px]">ALLOWED RADIUS (METERS)</label>
+                                    <input type="number" id="geoRadiusInput" value="50" class="w-full bg-slate-950 text-white p-2 rounded border border-slate-700 mt-1">
+                                </div>
+                            </div>
+
                             <button onclick="createNewLectureSession()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">
                                 <i class="fa-solid fa-play mr-2"></i> Initialize Live Session
                             </button>
@@ -191,40 +196,9 @@
                         </div>
                     </div>
 
-                    <div class="card-bg p-6 rounded-2xl shadow-xl">
-                        <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4">
-                            <h3 class="font-bold text-base text-white-force"><i class="fa-solid fa-shield-halved text-blue-400 mr-2"></i>Security Token Stream</h3>
-                            <span class="bg-blue-500/10 text-blue-400 text-[10px] font-semibold px-2 py-0.5 rounded border border-blue-500/20 uppercase">20s Loop</span>
-                        </div>
-
-                        <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700 mb-6">
-                            <button onclick="setSecurityMode('qr')" id="btnModeQr" class="flex-1 py-1.5 rounded text-xs font-semibold text-center transition">
-                                <i class="fa-solid fa-qrcode mr-1"></i> Dynamic QR
-                            </button>
-                            <button onclick="setSecurityMode('verbal')" id="btnModeVerbal" class="flex-1 py-1.5 rounded text-xs font-semibold text-center transition">
-                                <i class="fa-solid fa-chalkboard mr-1"></i> Verbal Code
-                            </button>
-                        </div>
-
-                        <div class="text-center relative">
-                            <div class="w-full bg-slate-900 h-1.5 rounded-full mb-4 overflow-hidden border border-slate-800">
-                                <div id="countdownBar" class="bg-blue-500 h-full w-full transition-all duration-1000 ease-linear"></div>
-                            </div>
-
-                            <div id="modeQrDisplay" class="flex flex-col items-center">
-                                <div class="bg-white p-3.5 rounded-xl inline-block shadow-lg border-2 border-slate-600 mb-3">
-                                    <img id="qrCodeImg" src="" alt="Live Secure Check-In QR" class="w-48 h-48">
-                                </div>
-                            </div>
-
-                            <div id="modeVerbalDisplay" class="hidden bg-slate-950 border-2 border-slate-700 rounded-2xl p-6 mb-3">
-                                <h1 id="verbalCodeText" class="text-7xl font-extrabold tracking-widest text-white-force my-4 animate-pulse">----</h1>
-                            </div>
-
-                            <button onclick="forceRotateToken()" class="mt-4 text-xs text-blue-400 hover:text-blue-300 underline underline-offset-4">
-                                <i class="fa-solid fa-arrows-rotate mr-1"></i> Force Rotation
-                            </button>
-                        </div>
+                    <div class="card-bg p-4 rounded-2xl text-center">
+                        <span class="text-xs text-slate-400 uppercase font-semibold">Total Submissions Checked</span>
+                        <h1 id="statsCount" class="text-4xl font-black text-blue-400 mt-1">0</h1>
                     </div>
                 </div>
 
@@ -248,7 +222,7 @@
                                 <thead>
                                     <tr class="border-b border-slate-700 text-xs text-slate-400 uppercase tracking-wider">
                                         <th class="py-3 px-2">Student</th>
-                                        <th class="py-3 px-2">Assigned Unit</th>
+                                        <th class="py-3 px-2">Security Metrics</th>
                                         <th class="py-3 px-2 text-right">Verified Time</th>
                                     </tr>
                                 </thead>
@@ -276,20 +250,19 @@
         let isDemoMode = false;
         let activeRole = 'student'; 
         let dashboardAuthenticated = false;
-        let activeSecurityMode = 'qr'; 
-        let rotationTimer = null;
-        let rotationCountdown = 20;
         let activeSecureToken = '0000';
         let studentProfile = null;
-        
-        // Dynamic Session Track State Variable
         let activeSessionData = null;
+
+        // Default Geofence Config
+        let targetLat = 5.6506;
+        let targetLng = -0.1870;
+        let allowedRadius = 50; 
 
         window.addEventListener('DOMContentLoaded', () => {
             initializeSupabase();
             loadStudentProfile();
             detectUrlParams();
-            startTokenEngine();
             syncActiveLectureSessionState();
         });
 
@@ -298,45 +271,72 @@
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 setupRealtimeSubscription();
             } catch(e) {
-                console.error("Supabase engine startup error:", e);
+                console.error("Supabase fail:", e);
                 isDemoMode = true;
             }
         }
 
         function setupRealtimeSubscription() {
             if (isDemoMode || !supabaseClient) return;
-
             try {
-                supabaseClient
-                    .channel('public:security_tokens')
-                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'security_tokens', filter: 'id=eq.active_session' }, payload => {
-                        if (payload.new) {
-                            activeSecureToken = payload.new.token;
-                            updateDashboardDisplays();
-                        }
-                    })
-                    .subscribe();
-
                 supabaseClient
                     .channel('public:attendance_realtime')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'lecture_sessions' }, () => {
                         syncActiveLectureSessionState();
                     })
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'attendance_logs' }, payload => {
-                        if (payload.new) {
-                            showToast("Live Entry", `Verified attendance log written successfully.`, "success");
-                            loadAttendanceData();
-                        }
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'attendance_logs' }, () => {
+                        loadAttendanceData();
                     })
                     .subscribe();
-            } catch (err) {
-                console.warn("Real-time listener channel crash:", err);
-            }
+            } catch (err) { console.warn(err); }
+        }
+
+        // GENERATING HARDWARE FINGERPRINTING SIGNATURES
+        function getDeviceFingerprint() {
+            const keys = [
+                navigator.userAgent,
+                navigator.language,
+                screen.colorDepth,
+                screen.width + 'x' + screen.height,
+                new Date().getTimezoneOffset(),
+                navigator.hardwareConcurrency || 'unknown'
+            ];
+            return btoa(keys.join('||')); // Returns a base64 device profile token hash
+        }
+
+        // HAVERSINE GEOMETRY EQUATION (Calculates distance between two coordinates in meters)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c; 
+        }
+
+        // GET DEVICE CURRENT GEOLOCATION (PROMISIFIED)
+        function getUserCoordinates() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error("Your browser hardware context does not support GPS locking operations."));
+                } else {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => resolve(position.coords),
+                        (err) => reject(new Error("Location permission denied. You must enable location services to check in.")),
+                        { enableHighAccuracy: true, timeout: 8000 }
+                    );
+                }
+            });
         }
 
         async function syncActiveLectureSessionState() {
             if (isDemoMode || !supabaseClient) return;
-
             try {
                 const { data, error } = await supabaseClient
                     .from('lecture_sessions')
@@ -346,8 +346,8 @@
                     .maybeSingle();
 
                 if (error) throw error;
-
                 const badge = document.getElementById('sessionStatusBadge');
+                
                 if (data) {
                     activeSessionData = data;
                     badge.className = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5";
@@ -361,79 +361,183 @@
                     activeSessionData = null;
                     badge.className = "bg-rose-500/10 text-rose-400 border border-rose-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5";
                     badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span> No Active Session`;
-                    
                     document.getElementById('sessionSetupState').classList.remove('hidden');
                     document.getElementById('sessionActiveState').classList.add('hidden');
                 }
-            } catch (err) {
-                console.error("Session configuration synch failure:", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         async function createNewLectureSession() {
             if (!dashboardAuthenticated) return;
             const targetCourse = document.getElementById('sessionCourseSelect').value;
+            
+            // Save local inputs back to runtime constraints variables
+            targetLat = parseFloat(document.getElementById('geoLatInput').value);
+            targetLng = parseFloat(document.getElementById('geoLngInput').value);
+            allowedRadius = parseInt(document.getElementById('geoRadiusInput').value);
 
             try {
-                // Shut down any stray active sessions first
                 await supabaseClient.from('lecture_sessions').update({ is_active: false }).eq('is_active', true);
-
-                const { error } = await supabaseClient
-                    .from('lecture_sessions')
-                    .insert({ course_id: targetCourse, is_active: true });
-
+                const { error } = await supabaseClient.from('lecture_sessions').insert({ course_id: targetCourse, is_active: true });
                 if (error) throw error;
-                showToast("Session Opened", `Tracking framework generated for ${targetCourse}`, "success");
+                showToast("Session Initiated", "Anti-Cheat coordinates parameters locked into engine memory.", "success");
                 syncActiveLectureSessionState();
-            } catch(e) {
-                showToast("Session Error", "Could not create tracking lifecycle profile.", "error");
-            }
+            } catch(e) { showToast("Error", "Could not initialize session", "error"); }
         }
 
         async function terminateActiveSession() {
             if (!dashboardAuthenticated || !activeSessionData) return;
+            try {
+                await supabaseClient.from('lecture_sessions').update({ is_active: false }).eq('id', activeSessionData.id);
+                showToast("Closed", "Data logs pipeline locked.", "info");
+                syncActiveLectureSessionState();
+            } catch(e) { console.error(e); }
+        }
+
+        async function handleCheckInSubmit(e) {
+            e.preventDefault();
+            const tokenSubmitted = document.getElementById('passcodeField').value.trim().toUpperCase();
+            const submitBtn = document.getElementById('checkInBtn');
+
+            if (!activeSessionData) {
+                showToast("System Locked", "No open active session stream detected.", "error");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-location-dot animate-bounce mr-2"></i> Locking GPS Coordinates...`;
 
             try {
-                const { error } = await supabaseClient
-                    .from('lecture_sessions')
-                    .update({ is_active: false })
-                    .eq('id', activeSessionData.id);
+                // 1. Fetch Location Coordinates via Hardware API
+                const coords = await getUserCoordinates();
+                
+                // 2. Validate proximity to lecture hall coordinates
+                const computedDistance = calculateDistance(coords.latitude, coords.longitude, targetLat, targetLng);
+                if (computedDistance > allowedRadius) {
+                    showToast("Geofence Verification Denied", `You are too far from the classroom (${Math.round(computedDistance)}m away).`, "error");
+                    return;
+                }
 
-                if (error) throw error;
-                showToast("Session Terminated", "Data stream closed successfully.", "info");
-                syncActiveLectureSessionState();
-            } catch(e) {
-                showToast("Write Failure", "Failed to close session.", "error");
+                // 3. Collect Browser Device Fingerprint Signature
+                const clientHardwareHash = getDeviceFingerprint();
+
+                // 4. Fetch Active Roll Passcode from Supabase
+                const { data: tokenData, error: tokenErr } = await supabaseClient.from('security_tokens').select('token').eq('id', 'active_session').single();
+                if (tokenErr) throw tokenErr;
+
+                if (tokenSubmitted !== tokenData.token.toUpperCase()) {
+                    showToast("Token Match Failure", "Verification password invalid.", "error");
+                    return;
+                }
+
+                // 5. Query for Proxy Violations (Check if someone else has already submitted from this device today)
+                const checkInDate = new Date().toISOString().split('T');
+                const { data: duplicateDevices } = await supabaseClient
+                    .from('attendance_logs')
+                    .select('student_id')
+                    .eq('check_in_date', checkInDate)
+                    .eq('hardware_fingerprint', clientHardwareHash);
+
+                const proxyFlagged = (duplicateDevices && duplicateDevices.length > 0);
+
+                // 6. Push Verified Logs Record payload entry back to Cloud Server
+                const { error: insertError } = await supabaseClient
+                    .from('attendance_logs')
+                    .insert({
+                        student_id: studentProfile.id,
+                        student_name: studentProfile.name,
+                        course_id: activeSessionData.course_id,
+                        session_id: activeSessionData.id,
+                        check_in_date: checkInDate,
+                        hardware_fingerprint: clientHardwareHash,
+                        latitude: coords.latitude,
+                        longitude: coords.longitude,
+                        is_flagged_proxy: proxyFlagged
+                    });
+
+                if (insertError) {
+                    if (insertError.code === '23505') {
+                        showToast("Already Counted", "Your presence signature has already been recorded for this session.", "info");
+                    } else { throw insertError; }
+                } else {
+                    if (proxyFlagged) {
+                        showToast("Flagged Submission", "Presence registered, but device proxy warning triggered.", "error");
+                    } else {
+                        showToast("Presence Verified", "Geofence validation check passed successfully.", "success");
+                    }
+                    document.getElementById('passcodeField').value = '';
+                }
+            } catch (err) {
+                showToast("Security Exception Fault", err.message || "Failed anti-cheat pipeline check.", "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-shield-halved mr-2"></i> Validate Presence`;
             }
         }
 
-        function detectUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('token');
-            if (token) {
-                const passcodeField = document.getElementById('passcodeField');
-                if (passcodeField) passcodeField.value = token.toUpperCase();
-            }
-            switchTab(urlParams.get('role') === 'dashboard' ? 'teacher' : 'student');
+        async function loadAttendanceData() {
+            if (!dashboardAuthenticated || !activeSessionData) return;
+            const logBody = document.getElementById('attendanceLogBody');
+
+            try {
+                let { data: records, error } = await supabaseClient.from('attendance_logs').select('*').eq('session_id', activeSessionData.id);
+                if (error) throw error;
+                records = records || [];
+                records.sort((a,b) => new Date(b.checked_in_at) - new Date(a.checked_in_at));
+
+                logBody.querySelectorAll('tr:not(#emptyLogPlaceholder)').forEach(r => r.remove());
+                const placeholder = document.getElementById('emptyLogPlaceholder');
+                
+                if (records.length === 0) {
+                    placeholder.classList.remove('hidden');
+                    document.getElementById('statsCount').innerText = '0';
+                    return;
+                }
+
+                placeholder.classList.add('hidden');
+                document.getElementById('statsCount').innerText = records.length;
+
+                records.forEach(rec => {
+                    const row = document.createElement('tr');
+                    // Visually mark proxy accounts in red if flagged
+                    row.className = rec.is_flagged_proxy 
+                        ? "bg-rose-950/40 border-b border-rose-900 text-rose-200 transition hover:bg-rose-950/60"
+                        : "border-b border-slate-800 hover:bg-slate-850/50 transition text-slate-300";
+                    
+                    const checkInTime = new Date(rec.checked_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    const safetyBadge = rec.is_flagged_proxy 
+                        ? `<span class="text-[9px] font-bold bg-rose-500 text-white px-1.5 py-0.5 rounded ml-2"><i class="fa-solid fa-triangle-exclamation"></i> DUP DEVICE (PROXY SUSPECT)</span>`
+                        : `<span class="text-[9px] font-bold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded ml-2 border border-emerald-500/30">GPS Secure</span>`;
+
+                    row.innerHTML = `
+                        <td class="py-3 px-2">
+                            <p class="font-bold text-white-force">${rec.student_name} ${safetyBadge}</p>
+                            <p class="text-[10px] text-slate-400 font-mono">${rec.student_id}</p>
+                        </td>
+                        <td class="py-3 px-2 font-mono text-[10px] text-slate-400">
+                            Lat: ${rec.latitude ? rec.latitude.toFixed(4) : 'N/A'}, Lng: ${rec.longitude ? rec.longitude.toFixed(4) : 'N/A'}
+                        </td>
+                        <td class="py-3 px-2 text-right text-xs font-semibold">${checkInTime}</td>
+                    `;
+                    logBody.appendChild(row);
+                });
+            } catch(err) { console.error(err); }
         }
 
         function switchTab(role) {
             activeRole = role;
             const tabStudent = document.getElementById('tabStudent');
             const tabTeacher = document.getElementById('tabTeacher');
-            const studentSection = document.getElementById('studentSection');
-            const teacherSection = document.getElementById('teacherSection');
-
             if (role === 'student') {
                 tabStudent.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm bg-blue-600 text-white-force border border-blue-500/20";
                 tabTeacher.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm text-slate-400 hover:text-white";
-                studentSection.classList.remove('hidden');
-                teacherSection.classList.add('hidden');
+                document.getElementById('studentSection').classList.remove('hidden');
+                document.getElementById('teacherSection').classList.add('hidden');
             } else {
                 tabTeacher.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm bg-blue-600 text-white-force border border-blue-500/20";
                 tabStudent.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm text-slate-400 hover:text-white";
-                studentSection.classList.add('hidden');
-                teacherSection.classList.remove('hidden');
+                document.getElementById('studentSection').classList.add('hidden');
+                document.getElementById('teacherSection').classList.remove('hidden');
 
                 if (!dashboardAuthenticated) {
                     document.getElementById('dashboardAuth').classList.remove('hidden');
@@ -463,13 +567,12 @@
 
         function handleRegistration(e) {
             e.preventDefault();
-            const idVal = document.getElementById('regId').value.trim().toUpperCase();
-            const nameVal = document.getElementById('regName').value.trim();
-            const courseVal = document.getElementById('regCourse').value;
-
-            studentProfile = { id: idVal, name: nameVal, course: courseVal };
+            studentProfile = {
+                id: document.getElementById('regId').value.trim().toUpperCase(),
+                name: document.getElementById('regName').value.trim(),
+                course: document.getElementById('regCourse').value
+            };
             localStorage.setItem('apex_student_profile', JSON.stringify(studentProfile));
-            showToast("Profile Configured", "LocalStorage registration context stored.", "success");
             loadStudentProfile();
         }
 
@@ -481,254 +584,42 @@
             }
         }
 
-        async function handleCheckInSubmit(e) {
-            e.preventDefault();
-            const tokenSubmitted = document.getElementById('passcodeField').value.trim().toUpperCase();
-            const submitBtn = document.getElementById('checkInBtn');
-
-            if (!activeSessionData) {
-                showToast("Submission Rejected", "There is no active dynamic session streaming right now.", "error");
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Confirming...`;
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('security_tokens')
-                    .select('token')
-                    .eq('id', 'active_session')
-                    .single();
-
-                if (error) throw error;
-
-                if (tokenSubmitted !== data.token.toUpperCase()) {
-                    showToast("Token Match Failure", "Verification credentials rejected.", "error");
-                    return;
-                }
-
-                const checkInDate = new Date().toISOString().split('T');
-                
-                const { error: insertError } = await supabaseClient
-                    .from('attendance_logs')
-                    .insert({
-                        student_id: studentProfile.id,
-                        student_name: studentProfile.name,
-                        course_id: activeSessionData.course_id,
-                        session_id: activeSessionData.id,
-                        check_in_date: checkInDate
-                    });
-
-                if (insertError) {
-                    if (insertError.code === '23505') {
-                        showToast("Presence Verified", "You have already checked into this live tracker session profile.", "info");
-                    } else {
-                        throw insertError;
-                    }
-                } else {
-                    showToast("Verified Presence", "Successfully checked in to live session.", "success");
-                    document.getElementById('passcodeField').value = '';
-                }
-            } catch (err) {
-                showToast("System Error", "Log upload failed.", "error");
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fa-solid fa-circle-check mr-2"></i> Validate Presence`;
-            }
-        }
-
         function verifyDashboardPIN(e) {
             e.preventDefault();
             if (document.getElementById('adminPin').value.trim() === '2026') {
                 dashboardAuthenticated = true;
                 document.getElementById('dashboardAuth').classList.add('hidden');
                 document.getElementById('dashboardMain').classList.remove('hidden');
-                showToast("Access Granted", "Session authenticated.", "success");
                 syncActiveLectureSessionState();
             } else {
                 showToast("Access Denied", "Incorrect master authentication PIN.", "error");
-                document.getElementById('adminPin').value = '';
-            }
-        }
-
-        function setSecurityMode(mode) {
-            activeSecurityMode = mode;
-            const btnModeQr = document.getElementById('btnModeQr');
-            const btnModeVerbal = document.getElementById('btnModeVerbal');
-            
-            if (mode === 'qr') {
-                btnModeQr.className = "flex-1 py-1.5 rounded text-xs font-semibold text-center bg-blue-600 text-white-force";
-                btnModeVerbal.className = "flex-1 py-1.5 rounded text-xs font-semibold text-center text-slate-400 hover:text-white";
-                document.getElementById('modeQrDisplay').classList.remove('hidden');
-                document.getElementById('modeVerbalDisplay').classList.add('hidden');
-            } else {
-                btnModeVerbal.className = "flex-1 py-1.5 rounded text-xs font-semibold text-center bg-amber-600 text-white-force";
-                btnModeQr.className = "flex-1 py-1.5 rounded text-xs font-semibold text-center text-slate-400 hover:text-white";
-                document.getElementById('modeQrDisplay').classList.add('hidden');
-                document.getElementById('modeVerbalDisplay').classList.remove('hidden');
-            }
-            updateDashboardDisplays();
-        }
-
-        function generateRandomToken() {
-            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
-            let result = '';
-            for (let i = 0; i < 4; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return result;
-        }
-
-        async function rotateSecurityToken() {
-            if (activeRole !== 'teacher' || !dashboardAuthenticated || !activeSessionData) return;
-
-            const newToken = generateRandomToken();
-            activeSecureToken = newToken;
-
-            try {
-                await supabaseClient
-                    .from('security_tokens')
-                    .update({ token: newToken, updated_at: new Date().toISOString() })
-                    .eq('id', 'active_session');
-                updateDashboardDisplays();
-            } catch(err) {
-                console.error("Token sync error:", err);
-            }
-        }
-
-        function forceRotateToken() {
-            rotationCountdown = 20;
-            rotateSecurityToken();
-        }
-
-        function updateDashboardDisplays() {
-            const verbalText = document.getElementById('verbalCodeText');
-            if (verbalText) verbalText.innerText = activeSecureToken;
-
-            const checkInUrl = `${window.location.origin}${window.location.pathname}?token=${activeSecureToken}`;
-            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(checkInUrl)}&color=0f172a&bgcolor=ffffff`;
-            
-            const qrImg = document.getElementById('qrCodeImg');
-            if (qrImg) qrImg.src = qrApiUrl;
-        }
-
-        function startTokenEngine() {
-            if (rotationTimer) clearInterval(rotationTimer);
-            rotationTimer = setInterval(() => {
-                rotationCountdown--;
-                const bar = document.getElementById('countdownBar');
-                if (bar) bar.style.width = `${(rotationCountdown / 20) * 100}%`;
-
-                if (rotationCountdown <= 0) {
-                    rotationCountdown = 20;
-                    rotateSecurityToken();
-                }
-            }, 1000);
-        }
-
-        async function loadAttendanceData() {
-            if (!dashboardAuthenticated || !activeSessionData) return;
-            const logBody = document.getElementById('attendanceLogBody');
-
-            try {
-                let { data: records, error } = await supabaseClient
-                    .from('attendance_logs')
-                    .select('*')
-                    .eq('session_id', activeSessionData.id);
-
-                if (error) throw error;
-                records = records || [];
-                records.sort((a,b) => new Date(b.checked_in_at) - new Date(a.checked_in_at));
-
-                logBody.querySelectorAll('tr:not(#emptyLogPlaceholder)').forEach(r => r.remove());
-
-                const placeholder = document.getElementById('emptyLogPlaceholder');
-                if (records.length === 0) {
-                    placeholder.classList.remove('hidden');
-                    document.getElementById('statsCount').innerText = '0';
-                    return;
-                }
-
-                placeholder.classList.add('hidden');
-                document.getElementById('statsCount').innerText = records.length;
-
-                records.forEach(rec => {
-                    const row = document.createElement('tr');
-                    row.className = "border-b border-slate-800 hover:bg-slate-850/50 transition";
-                    const checkInTime = new Date(rec.checked_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-                    row.innerHTML = `
-                        <td class="py-3 px-2">
-                            <p class="font-bold text-white-force">${rec.student_name}</p>
-                            <p class="text-[10px] text-slate-400 font-mono">${rec.student_id}</p>
-                        </td>
-                        <td class="py-3 px-2">
-                            <span class="bg-slate-900 border border-slate-700 text-xs px-2.5 py-1 rounded-md text-slate-300 font-medium">${rec.course_id}</span>
-                        </td>
-                        <td class="py-3 px-2 text-right text-xs text-slate-400 font-semibold">${checkInTime}</td>
-                    `;
-                    logBody.appendChild(row);
-                });
-            } catch(err) {
-                console.error(err);
-            }
-        }
-
-        async function exportToCSV() {
-            if (!activeSessionData) return;
-            try {
-                let { data: records, error } = await supabaseClient.from('attendance_logs').select('*').eq('session_id', activeSessionData.id);
-                if (error) throw error;
-
-                if (!records || records.length === 0) {
-                    showToast("No Records", "No data to export.", "error");
-                    return;
-                }
-
-                let csvContent = "data:text/csv;charset=utf-8,Student ID,Student Name,Course Code,Check In Date,Check In Time\n";
-                records.forEach(r => {
-                    const checkInTime = new Date(r.checked_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    csvContent += `${r.student_id},${r.student_name.replace(/,/g, '')},${r.course_id},${r.check_in_date},${checkInTime}\n`;
-                });
-
-                const downloadAnchor = document.createElement("a");
-                downloadAnchor.setAttribute("href", encodeURI(csvContent));
-                downloadAnchor.setAttribute("download", `ApexCheck_Session_${activeSessionData.id}.csv`);
-                document.body.appendChild(downloadAnchor);
-                downloadAnchor.click();
-                document.body.removeChild(downloadAnchor);
-            } catch(err) {
-                showToast("Export Failed", "Error compiling file.", "error");
             }
         }
 
         function showToast(title, msg, type = 'info') {
             const notif = document.getElementById('notificationAlert');
             const icon = document.getElementById('notifIcon');
-            const titleElem = document.getElementById('notifTitle');
-            const msgElem = document.getElementById('notifMsg');
-
-            if (!notif) return;
             notif.classList.remove('hidden');
-            titleElem.innerText = title;
-            msgElem.innerText = msg;
-
+            document.getElementById('notifTitle').innerText = title;
+            document.getElementById('notifMsg').innerText = msg;
             if (type === 'success') {
-                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-emerald-900/30 border-emerald-500/40 flex items-start gap-3 transition-all duration-300";
+                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-emerald-900/90 border-emerald-500/40 flex items-start gap-3 sticky top-16 z-50";
                 icon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>`;
             } else if (type === 'error') {
-                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-rose-900/30 border-rose-500/40 flex items-start gap-3 transition-all duration-300";
-                icon.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-400 text-lg"></i>`;
+                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-rose-900/90 border-rose-500/40 flex items-start gap-3 sticky top-16 z-50";
+                icon.innerHTML = `<i class="fa-solid fa-circle-exclamation text-rose-400 text-lg"></i>`;
             } else {
-                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-blue-900/30 border-blue-500/40 flex items-start gap-3 transition-all duration-300";
+                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-blue-900/90 border-blue-500/40 flex items-start gap-3 sticky top-16 z-50";
                 icon.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-lg"></i>`;
             }
+            setTimeout(() => { notif.classList.add('hidden'); }, 5000);
         }
 
-        function dismissNotification() {
-            const notif = document.getElementById('notificationAlert');
-            if (notif) notif.classList.add('hidden');
+        function detectUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            if (token) document.getElementById('passcodeField').value = token.toUpperCase();
+            switchTab(urlParams.get('role') === 'dashboard' ? 'teacher' : 'student');
         }
     </script>
 </body>
