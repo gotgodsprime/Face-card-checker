@@ -114,7 +114,7 @@
                 Student Portal
             </button>
             <button id="tabTeacher" onclick="switchTab('teacher')" class="flex-1 text-center py-2 rounded-lg font-semibold text-xs tracking-wide transition-all duration-300">
-                Instructor Panel
+                REP's Panel
             </button>
         </div>
 
@@ -137,20 +137,17 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-[10px] font-semibold theme-text-muted uppercase tracking-wider mb-1.5 ml-1">Index / Student ID</label>
-                            <input type="text" id="regId" placeholder="e.g. 1102945" class="w-full glass-input p-3.5 rounded-xl text-sm" required>
+                            <input type="text" id="regId" placeholder="e.g. 2526...." class="w-full glass-input p-3.5 rounded-xl text-sm" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold theme-text-muted uppercase tracking-wider mb-1.5 ml-1">Your Full Name</label>
-                            <input type="text" id="regName" placeholder="e.g. Emmanuel Boakye" class="w-full glass-input p-3.5 rounded-xl text-sm" required>
+                            <input type="text" id="regName" placeholder="e.g. GOTGOD JNR" class="w-full glass-input p-3.5 rounded-xl text-sm" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold theme-text-muted uppercase tracking-wider mb-1.5 ml-1">Allocated Unit</label>
                             <select id="regCourse" class="w-full glass-input p-3.5 rounded-xl text-sm bg-slate-100 dark:bg-slate-900 appearance-none" required>
                                 <option value="" disabled selected>Choose alignment...</option>
-                                <option value="CS-101">Computer Science 101</option>
-                                <option value="ENG-204">Engineering Mathematics II</option>
-                                <option value="PHY-110">Applied Physics</option>
-                                <option value="MKT-301">Principles of Marketing</option>
+                                <option value="CS-101">information Technology </option>
                             </select>
                         </div>
                         <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-bold text-xs rounded-xl tracking-wider uppercase transition shadow-lg shadow-blue-500/20 mt-2">
@@ -190,7 +187,7 @@
 
             <div id="studentHistoryCard" class="glass-panel p-5 rounded-3xl shadow-xl hidden">
                 <h3 class="font-bold text-xs tracking-wider uppercase theme-text-muted mb-4 border-b border-black/5 dark:border-white/5 pb-2">
-                    Personal Stream Records
+                    Personal  Records
                 </h3>
                 <div class="max-h-[200px] overflow-y-auto space-y-2.5 pr-1 no-scrollbar" id="studentHistoryList">
                     <p class="text-xs text-slate-500 text-center py-4">No records logged yet.</p>
@@ -209,7 +206,7 @@
                     <input type="password" id="adminPin" placeholder="••••" maxlength="4" class="w-full glass-input p-3 text-center text-2xl font-black rounded-xl mb-4 tracking-widest" required>
                     <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-bold text-xs rounded-xl tracking-wider uppercase transition shadow-lg shadow-blue-500/20">Authorize</button>
                 </form>
-                <p class="text-[10px] theme-text-muted mt-4">Console Access PIN: 2026</p>
+                <p class="text-[10px] theme-text-muted mt-4"> JOKA's world keep OFF </p>
             </div>
 
             <div id="dashboardMain" class="hidden space-y-6">
@@ -245,13 +242,11 @@
                             <div id="sessionSetupState">
                                 <label class="block text-[10px] font-semibold theme-text-muted uppercase tracking-wider mb-2 ml-1">Target Lecture Unit</label>
                                 <select id="sessionCourseSelect" class="w-full glass-input p-3.5 rounded-xl text-sm bg-slate-100 dark:bg-slate-900 mb-5 appearance-none">
-                                    <option value="CS-101">Computer Science 101</option>
-                                    <option value="ENG-204">Engineering Mathematics II</option>
-                                    <option value="PHY-110">Applied Physics</option>
-                                    <option value="MKT-301">Principles of Marketing</option>
+                                    <option value="CS-101">Information Tecnology</option>
+                                    
                                 </select>
                                 <button id="initializeBtn" onclick="createNewLectureSession()" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs tracking-widest uppercase transition shadow-lg shadow-blue-500/20">
-                                    Launch Stream Session
+                                    Launc Session
                                 </button>
                             </div>
 
@@ -650,7 +645,7 @@
 
         function verifyDashboardPIN(e) {
             e.preventDefault();
-            if (document.getElementById('adminPin').value.trim() === '2026') {
+            if (document.getElementById('adminPin').value.trim() === '9071') {
                 dashboardAuthenticated = true;
                 document.getElementById('dashboardAuth').classList.add('hidden');
                 document.getElementById('dashboardMain').classList.remove('hidden');
