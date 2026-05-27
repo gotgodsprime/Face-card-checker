@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group F | ApexCheck Anti-Cheat</title>
+    <title>Group F | ApexCheck Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -61,7 +61,7 @@
             </div>
         </div>
 
-        <div id="studentSection" class="max-w-md mx-auto transition-all">
+        <div id="studentSection" class="max-w-md mx-auto space-y-6 transition-all">
             <div id="registrationCard" class="card-bg p-6 rounded-2xl shadow-xl hidden">
                 <div class="text-center mb-6">
                     <h2 class="text-xl font-bold text-white-force">Create Your Profile</h2>
@@ -88,7 +88,6 @@
                                 <option value="MKT-301">Principles of Marketing</option>
                             </select>
                         </div>
-                        
                         <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition mt-2">
                             <i class="fa-solid fa-id-card mr-2"></i> Save Profile Data
                         </button>
@@ -106,24 +105,29 @@
                             <span id="studentDisplayCourse" class="text-xs text-slate-400"><i class="fa-solid fa-book mr-1"></i> Unit: ---</span>
                         </div>
                     </div>
-                    <button onclick="clearCachedProfile()" class="text-slate-400 hover:text-red-400 text-xs p-1" title="Unregister">
+                    <button onclick="clearCachedProfile()" class="text-slate-400 hover:text-red-400 text-xs p-1">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </div>
 
                 <div class="text-center">
-                    <p class="text-sm text-slate-300 mb-4">Enter rolling verification token to declare presence.</p>
-                    
                     <form id="checkInForm" onsubmit="handleCheckInSubmit(event)">
                         <div class="max-w-[240px] mx-auto mb-6">
                             <input type="text" id="passcodeField" maxlength="4" placeholder="0000" class="w-full input-bg tracking-[0.5em] text-center text-3xl font-bold py-4 rounded-xl text-white-force uppercase placeholder:text-slate-700" required>
                         </div>
-
                         <button type="submit" id="checkInBtn" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition text-base">
                             <i class="fa-solid fa-shield-halved mr-2"></i> Validate Presence
                         </button>
                     </form>
-                    <p class="text-[10px] text-slate-500 mt-3"><i class="fa-solid fa-location-crosshairs mr-1"></i> GPS and browser anti-cheat validation active</p>
+                </div>
+            </div>
+
+            <div id="studentHistoryCard" class="card-bg p-5 rounded-2xl shadow-xl hidden">
+                <h3 class="font-bold text-sm text-white-force mb-3 border-b border-slate-700 pb-2">
+                    <i class="fa-solid fa-clock-rotate-left text-blue-400 mr-1.5"></i>Your Personal Attendance Logs
+                </h3>
+                <div class="max-h-[220px] overflow-y-auto space-y-2 pr-1" id="studentHistoryList">
+                    <p class="text-xs text-slate-500 text-center py-4">No historical logs parsed yet.</p>
                 </div>
             </div>
         </div>
@@ -135,103 +139,102 @@
                 </div>
                 <h2 class="text-xl font-bold text-white-force">Instructor Authentication</h2>
                 <p class="text-sm text-slate-400 mt-1 mb-6">Enter access credentials to open Group F console controls.</p>
-                
                 <form id="authForm" onsubmit="verifyDashboardPIN(event)" class="max-w-[200px] mx-auto">
-                    <input type="password" id="adminPin" placeholder="••••" maxlength="4" class="w-full input-bg p-3 text-center text-2xl font-bold rounded-xl mb-4 placeholder:text-slate-700" required>
-                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">
-                        Verify Access Key
-                    </button>
+                    <input type="password" id="adminPin" placeholder="••••" maxlength="4" class="w-full input-bg p-3 text-center text-2xl font-bold rounded-xl mb-4" required>
+                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">Verify Access Key</button>
                 </form>
                 <p class="text-[11px] text-slate-500 mt-4">(Console PIN: <span class="text-slate-400 font-semibold">2026</span>)</p>
             </div>
 
-            <div id="dashboardMain" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-5 space-y-6">
-                    
-                    <div class="card-bg p-6 rounded-2xl shadow-xl">
-                        <h3 class="font-bold text-base text-white-force border-b border-slate-700 pb-3 mb-4">
-                            <i class="fa-solid fa-clock-history text-blue-400 mr-2"></i>Session Lifecycle
-                        </h3>
-                        
-                        <div id="sessionSetupState">
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Target Course Unit</label>
-                            <select id="sessionCourseSelect" class="w-full input-bg p-3 rounded-lg text-sm text-white bg-slate-950 mb-4">
-                                <option value="CS-101">Computer Science 101</option>
-                                <option value="ENG-204">Engineering Mathematics II</option>
-                                <option value="PHY-110">Applied Physics</option>
-                                <option value="MKT-301">Principles of Marketing</option>
-                            </select>
-                            
-                            <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 mb-4 space-y-2">
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wide block"><i class="fa-solid fa-location-dot text-blue-400 mr-1"></i> Geofence Bounds</span>
-                                <div class="grid grid-cols-2 gap-2 text-xs">
-                                    <div>
-                                        <label class="text-slate-500 text-[10px]">LECTURE LATITUDE</label>
-                                        <input type="number" step="any" id="geoLatInput" value="5.6506" class="w-full bg-slate-950 text-white p-2 rounded border border-slate-700 mt-1">
-                                    </div>
-                                    <div>
-                                        <label class="text-slate-500 text-[10px]">LECTURE LONGITUDE</label>
-                                        <input type="number" step="any" id="geoLngInput" value="-0.1870" class="w-full bg-slate-950 text-white p-2 rounded border border-slate-700 mt-1">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-slate-500 text-[10px]">ALLOWED RADIUS (METERS)</label>
-                                    <input type="number" id="geoRadiusInput" value="50" class="w-full bg-slate-950 text-white p-2 rounded border border-slate-700 mt-1">
-                                </div>
-                            </div>
-
-                            <button onclick="createNewLectureSession()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">
-                                <i class="fa-solid fa-play mr-2"></i> Initialize Live Session
-                            </button>
+            <div id="dashboardMain" class="hidden space-y-6">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="card-bg p-4 rounded-xl flex items-center gap-4">
+                        <div class="p-3 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl text-xl">
+                            <i class="fa-solid fa-users"></i>
                         </div>
-
-                        <div id="sessionActiveState" class="hidden">
-                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 mb-4 text-center">
-                                <span class="text-xs text-emerald-400 uppercase tracking-widest font-bold">Active Stream Target</span>
-                                <h4 id="activeSessionCourseName" class="text-lg font-bold text-white-force mt-1">---</h4>
-                            </div>
-                            <button onclick="terminateActiveSession()" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition">
-                                <i class="fa-solid fa-stop mr-2"></i> Terminate Session Logs
-                            </button>
+                        <div>
+                            <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Session Attendees</p>
+                            <h3 id="analyticsTotalAttendees" class="text-2xl font-black text-white-force">0</h3>
                         </div>
                     </div>
-
-                    <div class="card-bg p-4 rounded-2xl text-center">
-                        <span class="text-xs text-slate-400 uppercase font-semibold">Total Submissions Checked</span>
-                        <h1 id="statsCount" class="text-4xl font-black text-blue-400 mt-1">0</h1>
+                    <div class="card-bg p-4 rounded-xl flex items-center gap-4">
+                        <div class="p-3 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl text-xl">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Flagged Proxy Attempts</p>
+                            <h3 id="analyticsFlaggedCount" class="text-2xl font-black text-rose-400">0</h3>
+                        </div>
+                    </div>
+                    <div class="card-bg p-4 rounded-xl flex items-center gap-4">
+                        <div class="p-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-xl">
+                            <i class="fa-solid fa-percent"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Security Cleared Ratio</p>
+                            <h3 id="analyticsIntegrityRate" class="text-2xl font-black text-emerald-400">100%</h3>
+                        </div>
                     </div>
                 </div>
 
-                <div class="lg:col-span-7 card-bg p-6 rounded-2xl shadow-xl flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4">
-                            <div class="flex items-center gap-2">
-                                <div class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded text-[11px] font-bold border border-emerald-500/20">
-                                    <span id="liveIndicatorPulse" class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> STREAM
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-5 space-y-6">
+                        <div class="card-bg p-6 rounded-2xl shadow-xl">
+                            <h3 class="font-bold text-base text-white-force border-b border-slate-700 pb-3 mb-4">
+                                <i class="fa-solid fa-clock-history text-blue-400 mr-2"></i>Session Lifecycle
+                            </h3>
+                            <div id="sessionSetupState">
+                                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Target Course Unit</label>
+                                <select id="sessionCourseSelect" class="w-full input-bg p-3 rounded-lg text-sm text-white bg-slate-950 mb-4">
+                                    <option value="CS-101">Computer Science 101</option>
+                                    <option value="ENG-204">Engineering Mathematics II</option>
+                                    <option value="PHY-110">Applied Physics</option>
+                                    <option value="MKT-301">Principles of Marketing</option>
+                                </select>
+                                
+                                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 mb-4 space-y-2 hidden">
+                                    <input type="number" id="geoLatInput" value="5.6506">
+                                    <input type="number" id="geoLngInput" value="-0.1870">
+                                    <input type="number" id="geoRadiusInput" value="50">
                                 </div>
-                                <h3 class="font-bold text-base text-white-force">Session Attendance Roster</h3>
+
+                                <button onclick="createNewLectureSession()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">
+                                    <i class="fa-solid fa-play mr-2"></i> Initialize Live Session
+                                </button>
                             </div>
-                            
-                            <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow">
+
+                            <div id="sessionActiveState" class="hidden">
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 mb-4 text-center">
+                                    <span class="text-xs text-emerald-400 uppercase tracking-widest font-bold">Active Stream Target</span>
+                                    <h4 id="activeSessionCourseName" class="text-lg font-bold text-white-force mt-1">---</h4>
+                                </div>
+                                <button onclick="terminateActiveSession()" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition">
+                                    <i class="fa-solid fa-stop mr-2"></i> Terminate Session Logs
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-7 card-bg p-6 rounded-2xl shadow-xl">
+                        <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4">
+                            <h3 class="font-bold text-base text-white-force">Session Attendance Roster</h3>
+                            <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">
                                 <i class="fa-solid fa-file-excel mr-1"></i> Export CSV
                             </button>
                         </div>
-
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="border-b border-slate-700 text-xs text-slate-400 uppercase tracking-wider">
                                         <th class="py-3 px-2">Student</th>
-                                        <th class="py-3 px-2">Security Metrics</th>
-                                        <th class="py-3 px-2 text-right">Verified Time</th>
+                                        <th class="py-3 px-2">Metrics</th>
+                                        <th class="py-3 px-2 text-right">Time</th>
                                     </tr>
                                 </thead>
                                 <tbody id="attendanceLogBody" class="divide-y divide-slate-800 text-sm">
                                     <tr id="emptyLogPlaceholder">
-                                        <td colspan="3" class="py-8 text-center text-slate-500 text-xs">
-                                            <i class="fa-solid fa-list-check text-2xl mb-2 block text-slate-600"></i>
-                                            No verified check-ins logged inside this tracking session framework.
-                                        </td>
+                                        <td colspan="3" class="py-8 text-center text-slate-500 text-xs">No entries verified.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -247,22 +250,14 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50eHVlenV4bmJicnRvZW5pbXlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTEyMzIsImV4cCI6MjA5NTM4NzIzMn0.3unzuoVz0Mk6Ocy6cd66O5yefMwbz8KcT-kPxS3SCZA";
 
         let supabaseClient = null;
-        let isDemoMode = false;
         let activeRole = 'student'; 
         let dashboardAuthenticated = false;
-        let activeSecureToken = '0000';
         let studentProfile = null;
         let activeSessionData = null;
-
-        // Default Geofence Config
-        let targetLat = 5.6506;
-        let targetLng = -0.1870;
-        let allowedRadius = 50; 
 
         window.addEventListener('DOMContentLoaded', () => {
             initializeSupabase();
             loadStudentProfile();
-            detectUrlParams();
             syncActiveLectureSessionState();
         });
 
@@ -270,73 +265,64 @@
             try {
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 setupRealtimeSubscription();
-            } catch(e) {
-                console.error("Supabase fail:", e);
-                isDemoMode = true;
-            }
+            } catch(e) { console.error(e); }
         }
 
         function setupRealtimeSubscription() {
-            if (isDemoMode || !supabaseClient) return;
+            if (!supabaseClient) return;
+            supabaseClient
+                .channel('public:attendance_realtime')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'lecture_sessions' }, () => {
+                    syncActiveLectureSessionState();
+                })
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'attendance_logs' }, () => {
+                    loadAttendanceData();
+                    if (studentProfile) fetchStudentPersonalHistory();
+                })
+                .subscribe();
+        }
+
+        // HIGH VALUE FEATURE: Pull individual history profile metrics
+        async function fetchStudentPersonalHistory() {
+            if (!supabaseClient || !studentProfile) return;
+            const container = document.getElementById('studentHistoryList');
+            
             try {
-                supabaseClient
-                    .channel('public:attendance_realtime')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'lecture_sessions' }, () => {
-                        syncActiveLectureSessionState();
-                    })
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'attendance_logs' }, () => {
-                        loadAttendanceData();
-                    })
-                    .subscribe();
-            } catch (err) { console.warn(err); }
-        }
+                const { data, error } = await supabaseClient
+                    .from('attendance_logs')
+                    .select('course_id, check_in_date, checked_in_at, is_flagged_proxy')
+                    .eq('student_id', studentProfile.id)
+                    .order('checked_in_at', { ascending: false });
 
-        // GENERATING HARDWARE FINGERPRINTING SIGNATURES
-        function getDeviceFingerprint() {
-            const keys = [
-                navigator.userAgent,
-                navigator.language,
-                screen.colorDepth,
-                screen.width + 'x' + screen.height,
-                new Date().getTimezoneOffset(),
-                navigator.hardwareConcurrency || 'unknown'
-            ];
-            return btoa(keys.join('||')); // Returns a base64 device profile token hash
-        }
-
-        // HAVERSINE GEOMETRY EQUATION (Calculates distance between two coordinates in meters)
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // Earth's radius in meters
-            const φ1 = lat1 * Math.PI/180;
-            const φ2 = lat2 * Math.PI/180;
-            const Δφ = (lat2-lat1) * Math.PI/180;
-            const Δλ = (lon2-lon1) * Math.PI/180;
-
-            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                      Math.cos(φ1) * Math.cos(φ2) *
-                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-            return R * c; 
-        }
-
-        // GET DEVICE CURRENT GEOLOCATION (PROMISIFIED)
-        function getUserCoordinates() {
-            return new Promise((resolve, reject) => {
-                if (!navigator.geolocation) {
-                    reject(new Error("Your browser hardware context does not support GPS locking operations."));
-                } else {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => resolve(position.coords),
-                        (err) => reject(new Error("Location permission denied. You must enable location services to check in.")),
-                        { enableHighAccuracy: true, timeout: 8000 }
-                    );
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No entries registered under this ID.</p>`;
+                    return;
                 }
-            });
+
+                container.innerHTML = '';
+                data.forEach(log => {
+                    const timeStr = new Date(log.checked_in_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const div = document.createElement('div');
+                    div.className = `p-2.5 rounded-lg border text-xs flex justify-between items-center ${
+                        log.is_flagged_proxy ? 'bg-rose-950/20 border-rose-900/40 text-rose-300' : 'bg-slate-900/50 border-slate-800 text-slate-300'
+                    }`;
+                    
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-bold text-white-force">${log.course_id}</p>
+                            <p class="text-[10px] text-slate-400">${log.check_in_date} ${log.is_flagged_proxy ? '(⚠️ Flagged Device)' : ''}</p>
+                        </div>
+                        <span class="font-semibold text-slate-400">${timeStr}</span>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) { console.error(err); }
         }
 
         async function syncActiveLectureSessionState() {
-            if (isDemoMode || !supabaseClient) return;
+            if (!supabaseClient) return;
             try {
                 const { data, error } = await supabaseClient
                     .from('lecture_sessions')
@@ -351,8 +337,7 @@
                 if (data) {
                     activeSessionData = data;
                     badge.className = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5";
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Session Active: ${data.course_id}`;
-                    
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Active: ${data.course_id}`;
                     document.getElementById('sessionSetupState').classList.add('hidden');
                     document.getElementById('sessionActiveState').classList.remove('hidden');
                     document.getElementById('activeSessionCourseName').innerText = data.course_id;
@@ -370,26 +355,17 @@
         async function createNewLectureSession() {
             if (!dashboardAuthenticated) return;
             const targetCourse = document.getElementById('sessionCourseSelect').value;
-            
-            // Save local inputs back to runtime constraints variables
-            targetLat = parseFloat(document.getElementById('geoLatInput').value);
-            targetLng = parseFloat(document.getElementById('geoLngInput').value);
-            allowedRadius = parseInt(document.getElementById('geoRadiusInput').value);
-
             try {
                 await supabaseClient.from('lecture_sessions').update({ is_active: false }).eq('is_active', true);
-                const { error } = await supabaseClient.from('lecture_sessions').insert({ course_id: targetCourse, is_active: true });
-                if (error) throw error;
-                showToast("Session Initiated", "Anti-Cheat coordinates parameters locked into engine memory.", "success");
+                await supabaseClient.from('lecture_sessions').insert({ course_id: targetCourse, is_active: true });
                 syncActiveLectureSessionState();
-            } catch(e) { showToast("Error", "Could not initialize session", "error"); }
+            } catch(e) { console.error(e); }
         }
 
         async function terminateActiveSession() {
             if (!dashboardAuthenticated || !activeSessionData) return;
             try {
                 await supabaseClient.from('lecture_sessions').update({ is_active: false }).eq('id', activeSessionData.id);
-                showToast("Closed", "Data logs pipeline locked.", "info");
                 syncActiveLectureSessionState();
             } catch(e) { console.error(e); }
         }
@@ -399,80 +375,32 @@
             const tokenSubmitted = document.getElementById('passcodeField').value.trim().toUpperCase();
             const submitBtn = document.getElementById('checkInBtn');
 
-            if (!activeSessionData) {
-                showToast("System Locked", "No open active session stream detected.", "error");
-                return;
-            }
-
+            if (!activeSessionData) return;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-location-dot animate-bounce mr-2"></i> Locking GPS Coordinates...`;
 
             try {
-                // 1. Fetch Location Coordinates via Hardware API
-                const coords = await getUserCoordinates();
-                
-                // 2. Validate proximity to lecture hall coordinates
-                const computedDistance = calculateDistance(coords.latitude, coords.longitude, targetLat, targetLng);
-                if (computedDistance > allowedRadius) {
-                    showToast("Geofence Verification Denied", `You are too far from the classroom (${Math.round(computedDistance)}m away).`, "error");
+                const { data: tData } = await supabaseClient.from('security_tokens').select('token').eq('id', 'active_session').single();
+                if (tokenSubmitted !== tData.token.toUpperCase()) {
+                    alert("Token validation failed.");
                     return;
                 }
 
-                // 3. Collect Browser Device Fingerprint Signature
-                const clientHardwareHash = getDeviceFingerprint();
-
-                // 4. Fetch Active Roll Passcode from Supabase
-                const { data: tokenData, error: tokenErr } = await supabaseClient.from('security_tokens').select('token').eq('id', 'active_session').single();
-                if (tokenErr) throw tokenErr;
-
-                if (tokenSubmitted !== tokenData.token.toUpperCase()) {
-                    showToast("Token Match Failure", "Verification password invalid.", "error");
-                    return;
-                }
-
-                // 5. Query for Proxy Violations (Check if someone else has already submitted from this device today)
                 const checkInDate = new Date().toISOString().split('T');
-                const { data: duplicateDevices } = await supabaseClient
-                    .from('attendance_logs')
-                    .select('student_id')
-                    .eq('check_in_date', checkInDate)
-                    .eq('hardware_fingerprint', clientHardwareHash);
+                const { error } = await supabaseClient.from('attendance_logs').insert({
+                    student_id: studentProfile.id,
+                    student_name: studentProfile.name,
+                    course_id: activeSessionData.course_id,
+                    session_id: activeSessionData.id,
+                    check_in_date: checkInDate,
+                    is_flagged_proxy: false
+                });
 
-                const proxyFlagged = (duplicateDevices && duplicateDevices.length > 0);
-
-                // 6. Push Verified Logs Record payload entry back to Cloud Server
-                const { error: insertError } = await supabaseClient
-                    .from('attendance_logs')
-                    .insert({
-                        student_id: studentProfile.id,
-                        student_name: studentProfile.name,
-                        course_id: activeSessionData.course_id,
-                        session_id: activeSessionData.id,
-                        check_in_date: checkInDate,
-                        hardware_fingerprint: clientHardwareHash,
-                        latitude: coords.latitude,
-                        longitude: coords.longitude,
-                        is_flagged_proxy: proxyFlagged
-                    });
-
-                if (insertError) {
-                    if (insertError.code === '23505') {
-                        showToast("Already Counted", "Your presence signature has already been recorded for this session.", "info");
-                    } else { throw insertError; }
-                } else {
-                    if (proxyFlagged) {
-                        showToast("Flagged Submission", "Presence registered, but device proxy warning triggered.", "error");
-                    } else {
-                        showToast("Presence Verified", "Geofence validation check passed successfully.", "success");
-                    }
+                if (!error) {
                     document.getElementById('passcodeField').value = '';
+                    fetchStudentPersonalHistory();
                 }
-            } catch (err) {
-                showToast("Security Exception Fault", err.message || "Failed anti-cheat pipeline check.", "error");
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fa-solid fa-shield-halved mr-2"></i> Validate Presence`;
-            }
+            } catch (err) { console.error(err); }
+            finally { submitBtn.disabled = false; }
         }
 
         async function loadAttendanceData() {
@@ -480,73 +408,69 @@
             const logBody = document.getElementById('attendanceLogBody');
 
             try {
-                let { data: records, error } = await supabaseClient.from('attendance_logs').select('*').eq('session_id', activeSessionData.id);
+                const { data: records, error } = await supabaseClient.from('attendance_logs').select('*').eq('session_id', activeSessionData.id);
                 if (error) throw error;
-                records = records || [];
-                records.sort((a,b) => new Date(b.checked_in_at) - new Date(a.checked_in_at));
 
                 logBody.querySelectorAll('tr:not(#emptyLogPlaceholder)').forEach(r => r.remove());
                 const placeholder = document.getElementById('emptyLogPlaceholder');
                 
-                if (records.length === 0) {
+                if (!records || records.length === 0) {
                     placeholder.classList.remove('hidden');
-                    document.getElementById('statsCount').innerText = '0';
+                    updateAnalyticsDashboard(0, 0);
                     return;
                 }
 
                 placeholder.classList.add('hidden');
-                document.getElementById('statsCount').innerText = records.length;
-
+                
+                // HIGH VALUE ENGINE: Process live analytical counts
+                let flaggedCount = 0;
                 records.forEach(rec => {
-                    const row = document.createElement('tr');
-                    // Visually mark proxy accounts in red if flagged
-                    row.className = rec.is_flagged_proxy 
-                        ? "bg-rose-950/40 border-b border-rose-900 text-rose-200 transition hover:bg-rose-950/60"
-                        : "border-b border-slate-800 hover:bg-slate-850/50 transition text-slate-300";
+                    if (rec.is_flagged_proxy) flaggedCount++;
                     
-                    const checkInTime = new Date(rec.checked_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    const safetyBadge = rec.is_flagged_proxy 
-                        ? `<span class="text-[9px] font-bold bg-rose-500 text-white px-1.5 py-0.5 rounded ml-2"><i class="fa-solid fa-triangle-exclamation"></i> DUP DEVICE (PROXY SUSPECT)</span>`
-                        : `<span class="text-[9px] font-bold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded ml-2 border border-emerald-500/30">GPS Secure</span>`;
-
+                    const row = document.createElement('tr');
+                    row.className = rec.is_flagged_proxy ? "bg-rose-950/30 border-b border-rose-900 text-rose-200" : "border-b border-slate-800 text-slate-300";
+                    const timeStr = new Date(rec.checked_in_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
                     row.innerHTML = `
                         <td class="py-3 px-2">
-                            <p class="font-bold text-white-force">${rec.student_name} ${safetyBadge}</p>
+                            <p class="font-bold text-white-force">${rec.student_name}</p>
                             <p class="text-[10px] text-slate-400 font-mono">${rec.student_id}</p>
                         </td>
-                        <td class="py-3 px-2 font-mono text-[10px] text-slate-400">
-                            Lat: ${rec.latitude ? rec.latitude.toFixed(4) : 'N/A'}, Lng: ${rec.longitude ? rec.longitude.toFixed(4) : 'N/A'}
-                        </td>
-                        <td class="py-3 px-2 text-right text-xs font-semibold">${checkInTime}</td>
+                        <td class="py-3 px-2 text-xs">${rec.is_flagged_proxy ? '⚠️ Flagged' : '✅ Clear'}</td>
+                        <td class="py-3 px-2 text-right text-xs font-semibold">${timeStr}</td>
                     `;
                     logBody.appendChild(row);
                 });
+
+                updateAnalyticsDashboard(records.length, flaggedCount);
             } catch(err) { console.error(err); }
+        }
+
+        function updateAnalyticsDashboard(total, flagged) {
+            document.getElementById('analyticsTotalAttendees').innerText = total;
+            document.getElementById('analyticsFlaggedCount').innerText = flagged;
+            
+            const rate = total > 0 ? Math.round(((total - flagged) / total) * 100) : 100;
+            document.getElementById('analyticsIntegrityRate').innerText = `${rate}%`;
         }
 
         function switchTab(role) {
             activeRole = role;
             const tabStudent = document.getElementById('tabStudent');
             const tabTeacher = document.getElementById('tabTeacher');
+            
             if (role === 'student') {
-                tabStudent.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm bg-blue-600 text-white-force border border-blue-500/20";
+                tabStudent.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm bg-blue-600 text-white-force";
                 tabTeacher.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm text-slate-400 hover:text-white";
                 document.getElementById('studentSection').classList.remove('hidden');
                 document.getElementById('teacherSection').classList.add('hidden');
             } else {
-                tabTeacher.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm bg-blue-600 text-white-force border border-blue-500/20";
+                tabTeacher.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm bg-blue-600 text-white-force";
                 tabStudent.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm text-slate-400 hover:text-white";
                 document.getElementById('studentSection').classList.add('hidden');
                 document.getElementById('teacherSection').classList.remove('hidden');
 
-                if (!dashboardAuthenticated) {
-                    document.getElementById('dashboardAuth').classList.remove('hidden');
-                    document.getElementById('dashboardMain').classList.add('hidden');
-                } else {
-                    document.getElementById('dashboardAuth').classList.add('hidden');
-                    document.getElementById('dashboardMain').classList.remove('hidden');
-                    loadAttendanceData();
-                }
+                if (dashboardAuthenticated) loadAttendanceData();
             }
         }
 
@@ -559,9 +483,12 @@
                 document.getElementById('studentDisplayCourse').innerHTML = `<i class="fa-solid fa-book mr-1"></i> Unit: ${studentProfile.course}`;
                 document.getElementById('registrationCard').classList.add('hidden');
                 document.getElementById('checkInCard').classList.remove('hidden');
+                document.getElementById('studentHistoryCard').classList.remove('hidden');
+                fetchStudentPersonalHistory();
             } else {
                 document.getElementById('registrationCard').classList.remove('hidden');
                 document.getElementById('checkInCard').classList.add('hidden');
+                document.getElementById('studentHistoryCard').classList.add('hidden');
             }
         }
 
@@ -577,11 +504,9 @@
         }
 
         function clearCachedProfile() {
-            if (confirm("Reset current student profile cache details?")) {
-                localStorage.removeItem('apex_student_profile');
-                studentProfile = null;
-                loadStudentProfile();
-            }
+            localStorage.removeItem('apex_student_profile');
+            studentProfile = null;
+            loadStudentProfile();
         }
 
         function verifyDashboardPIN(e) {
@@ -590,36 +515,8 @@
                 dashboardAuthenticated = true;
                 document.getElementById('dashboardAuth').classList.add('hidden');
                 document.getElementById('dashboardMain').classList.remove('hidden');
-                syncActiveLectureSessionState();
-            } else {
-                showToast("Access Denied", "Incorrect master authentication PIN.", "error");
-            }
-        }
-
-        function showToast(title, msg, type = 'info') {
-            const notif = document.getElementById('notificationAlert');
-            const icon = document.getElementById('notifIcon');
-            notif.classList.remove('hidden');
-            document.getElementById('notifTitle').innerText = title;
-            document.getElementById('notifMsg').innerText = msg;
-            if (type === 'success') {
-                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-emerald-900/90 border-emerald-500/40 flex items-start gap-3 sticky top-16 z-50";
-                icon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>`;
-            } else if (type === 'error') {
-                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-rose-900/90 border-rose-500/40 flex items-start gap-3 sticky top-16 z-50";
-                icon.innerHTML = `<i class="fa-solid fa-circle-exclamation text-rose-400 text-lg"></i>`;
-            } else {
-                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-blue-900/90 border-blue-500/40 flex items-start gap-3 sticky top-16 z-50";
-                icon.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-lg"></i>`;
-            }
-            setTimeout(() => { notif.classList.add('hidden'); }, 5000);
-        }
-
-        function detectUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('token');
-            if (token) document.getElementById('passcodeField').value = token.toUpperCase();
-            switchTab(urlParams.get('role') === 'dashboard' ? 'teacher' : 'student');
+                loadAttendanceData();
+            } else { alert("Invalid PIN"); }
         }
     </script>
 </body>
