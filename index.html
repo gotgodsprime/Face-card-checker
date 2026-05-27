@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group F | ApexCheck Analytics</title>
+    <title>Group F | ApexCheck Dynamic QR & PIN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         body {
@@ -18,6 +19,7 @@
         .input-bg { background-color: #0f172a !important; color: #ffffff !important; border: 2px solid #475569 !important; }
         .input-bg:focus { border-color: #3b82f6 !important; outline: none; }
         .text-white-force { color: #ffffff !important; }
+        #qrCanvasContainer img { margin: 0 auto; border: 8px solid white; border-radius: 8px; }
     </style>
 </head>
 <body class="min-h-screen pb-12 flex flex-col justify-between">
@@ -34,7 +36,10 @@
                 </div>
             </div>
             
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+                <span id="networkStatusStatus" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Online
+                </span>
                 <span id="sessionStatusBadge" class="bg-rose-500/10 text-rose-400 border border-rose-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-rose-500"></span> No Active Session
                 </span>
@@ -67,7 +72,6 @@
                     <h2 class="text-xl font-bold text-white-force">Create Your Profile</h2>
                     <p class="text-slate-400 text-sm mt-1">Register your device profile below to continue.</p>
                 </div>
-                
                 <form id="regForm" onsubmit="handleRegistration(event)">
                     <div class="space-y-4">
                         <div>
@@ -112,7 +116,8 @@
 
                 <div class="text-center">
                     <form id="checkInForm" onsubmit="handleCheckInSubmit(event)">
-                        <div class="max-w-[240px] mx-auto mb-6">
+                        <div class="max-w-[240px] mx-auto mb-4">
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Enter Session PIN</label>
                             <input type="text" id="passcodeField" maxlength="4" placeholder="0000" class="w-full input-bg tracking-[0.5em] text-center text-3xl font-bold py-4 rounded-xl text-white-force uppercase placeholder:text-slate-700" required>
                         </div>
                         <button type="submit" id="checkInBtn" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition text-base">
@@ -147,7 +152,6 @@
             </div>
 
             <div id="dashboardMain" class="hidden space-y-6">
-                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="card-bg p-4 rounded-xl flex items-center gap-4">
                         <div class="p-3 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl text-xl">
@@ -192,23 +196,26 @@
                                     <option value="PHY-110">Applied Physics</option>
                                     <option value="MKT-301">Principles of Marketing</option>
                                 </select>
-                                
-                                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 mb-4 space-y-2 hidden">
-                                    <input type="number" id="geoLatInput" value="5.6506">
-                                    <input type="number" id="geoLngInput" value="-0.1870">
-                                    <input type="number" id="geoRadiusInput" value="50">
-                                </div>
-
                                 <button onclick="createNewLectureSession()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">
                                     <i class="fa-solid fa-play mr-2"></i> Initialize Live Session
                                 </button>
                             </div>
 
-                            <div id="sessionActiveState" class="hidden">
-                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 mb-4 text-center">
+                            <div id="sessionActiveState" class="hidden space-y-4">
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center">
                                     <span class="text-xs text-emerald-400 uppercase tracking-widest font-bold">Active Stream Target</span>
                                     <h4 id="activeSessionCourseName" class="text-lg font-bold text-white-force mt-1">---</h4>
                                 </div>
+
+                                <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center space-y-4">
+                                    <div>
+                                        <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Live Verification Code</span>
+                                        <h1 id="livePinCodeDisplay" class="text-4xl font-black tracking-widest text-blue-400 mt-1">0000</h1>
+                                    </div>
+                                    <div id="qrCanvasContainer" class="p-2 bg-white rounded-lg inline-block mx-auto"></div>
+                                    <p class="text-[11px] text-slate-400">Students can scan this code or use the url parameters to match authentication variables.</p>
+                                </div>
+
                                 <button onclick="terminateActiveSession()" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition">
                                     <i class="fa-solid fa-stop mr-2"></i> Terminate Session Logs
                                 </button>
@@ -219,9 +226,6 @@
                     <div class="lg:col-span-7 card-bg p-6 rounded-2xl shadow-xl">
                         <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4">
                             <h3 class="font-bold text-base text-white-force">Session Attendance Roster</h3>
-                            <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">
-                                <i class="fa-solid fa-file-excel mr-1"></i> Export CSV
-                            </button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
@@ -254,11 +258,15 @@
         let dashboardAuthenticated = false;
         let studentProfile = null;
         let activeSessionData = null;
+        let qrGeneratorInstance = null;
+        let offlineSyncQueue = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             initializeSupabase();
             loadStudentProfile();
             syncActiveLectureSessionState();
+            initializeNetworkListeners();
+            detectUrlParams();
         });
 
         function initializeSupabase() {
@@ -266,6 +274,40 @@
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 setupRealtimeSubscription();
             } catch(e) { console.error(e); }
+        }
+
+        function initializeNetworkListeners() {
+            window.addEventListener('online', handleNetworkReturnOnline);
+            window.addEventListener('offline', () => {
+                const indicators = document.getElementById('networkStatusStatus');
+                indicators.className = "bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5";
+                indicators.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Offline Mode`;
+            });
+            const savedQueue = localStorage.getItem('apex_offline_queue');
+            if (savedQueue) offlineSyncQueue = JSON.parse(savedQueue);
+        }
+
+        async function handleNetworkReturnOnline() {
+            const indicators = document.getElementById('networkStatusStatus');
+            indicators.className = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5";
+            indicators.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Online`;
+            if (offlineSyncQueue.length > 0) await flushOfflineQueue();
+        }
+
+        async function flushOfflineQueue() {
+            if (!supabaseClient || offlineSyncQueue.length === 0) return;
+            const recordsToUpload = [...offlineSyncQueue];
+            offlineSyncQueue = [];
+            localStorage.setItem('apex_offline_queue', JSON.stringify(offlineSyncQueue));
+
+            for (const log of recordsToUpload) {
+                try {
+                    const { pendingOffline, ...cleanPayload } = log;
+                    await supabaseClient.from('attendance_logs').insert(cleanPayload);
+                } catch (e) { console.error(e); }
+            }
+            showToast("Sync Finished", "Offline records saved online.", "success");
+            fetchStudentPersonalHistory();
         }
 
         function setupRealtimeSubscription() {
@@ -282,43 +324,9 @@
                 .subscribe();
         }
 
-        // HIGH VALUE FEATURE: Pull individual history profile metrics
-        async function fetchStudentPersonalHistory() {
-            if (!supabaseClient || !studentProfile) return;
-            const container = document.getElementById('studentHistoryList');
-            
-            try {
-                const { data, error } = await supabaseClient
-                    .from('attendance_logs')
-                    .select('course_id, check_in_date, checked_in_at, is_flagged_proxy')
-                    .eq('student_id', studentProfile.id)
-                    .order('checked_in_at', { ascending: false });
-
-                if (error) throw error;
-                
-                if (!data || data.length === 0) {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No entries registered under this ID.</p>`;
-                    return;
-                }
-
-                container.innerHTML = '';
-                data.forEach(log => {
-                    const timeStr = new Date(log.checked_in_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    const div = document.createElement('div');
-                    div.className = `p-2.5 rounded-lg border text-xs flex justify-between items-center ${
-                        log.is_flagged_proxy ? 'bg-rose-950/20 border-rose-900/40 text-rose-300' : 'bg-slate-900/50 border-slate-800 text-slate-300'
-                    }`;
-                    
-                    div.innerHTML = `
-                        <div>
-                            <p class="font-bold text-white-force">${log.course_id}</p>
-                            <p class="text-[10px] text-slate-400">${log.check_in_date} ${log.is_flagged_proxy ? '(⚠️ Flagged Device)' : ''}</p>
-                        </div>
-                        <span class="font-semibold text-slate-400">${timeStr}</span>
-                    `;
-                    container.appendChild(div);
-                });
-            } catch (err) { console.error(err); }
+        // GENERATING UNIQUE DYNAMIC RANDOMLY PLUGGED PINS
+        function generateRandomPin() {
+            return Math.floor(1000 + Math.random() * 9000).toString();
         }
 
         async function syncActiveLectureSessionState() {
@@ -338,9 +346,17 @@
                     activeSessionData = data;
                     badge.className = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5";
                     badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Active: ${data.course_id}`;
+                    
                     document.getElementById('sessionSetupState').classList.add('hidden');
                     document.getElementById('sessionActiveState').classList.remove('hidden');
                     document.getElementById('activeSessionCourseName').innerText = data.course_id;
+
+                    // Fetch current security code validation status context values
+                    const { data: tokenRecord } = await supabaseClient.from('security_tokens').select('token').eq('id', 'active_session').single();
+                    if (tokenRecord) {
+                        document.getElementById('livePinCodeDisplay').innerText = tokenRecord.token;
+                        renderQRCodeCanvas(tokenRecord.token);
+                    }
                     loadAttendanceData();
                 } else {
                     activeSessionData = null;
@@ -352,12 +368,39 @@
             } catch (err) { console.error(err); }
         }
 
+        // RENDERING QR MATRIX INTERFACE 
+        function renderQRCodeCanvas(passcode) {
+            const qrContainer = document.getElementById('qrCanvasContainer');
+            qrContainer.innerHTML = '';
+            
+            // Build dynamic student deep linking check-in URL format context matching parameter flags
+            const deepLinkUrl = `${window.location.origin}${window.location.pathname}?token=${passcode}&role=student`;
+            
+            qrGeneratorInstance = new QRCode(qrContainer, {
+                text: deepLinkUrl,
+                width: 160,
+                height: 160,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
         async function createNewLectureSession() {
             if (!dashboardAuthenticated) return;
             const targetCourse = document.getElementById('sessionCourseSelect').value;
+            const liveGeneratedPin = generateRandomPin();
+
             try {
+                // 1. Force seal old session indicators
                 await supabaseClient.from('lecture_sessions').update({ is_active: false }).eq('is_active', true);
+                
+                // 2. Lock matching passcode strings down to database fields
+                await supabaseClient.from('security_tokens').upsert({ id: 'active_session', token: liveGeneratedPin });
+                
+                // 3. Setup new running session values inside database rows
                 await supabaseClient.from('lecture_sessions').insert({ course_id: targetCourse, is_active: true });
+                
                 syncActiveLectureSessionState();
             } catch(e) { console.error(e); }
         }
@@ -376,31 +419,86 @@
             const submitBtn = document.getElementById('checkInBtn');
 
             if (!activeSessionData) return;
-            submitBtn.disabled = true;
 
+            const checkInDate = new Date().toISOString().split('T');
+            const timestamp = new Date().toISOString();
+
+            const payload = {
+                student_id: studentProfile.id,
+                student_name: studentProfile.name,
+                course_id: activeSessionData.course_id,
+                session_id: activeSessionData.id,
+                check_in_date: checkInDate,
+                checked_in_at: timestamp,
+                is_flagged_proxy: false
+            };
+
+            if (!navigator.onLine) {
+                payload.pendingOffline = true;
+                offlineSyncQueue.push(payload);
+                localStorage.setItem('apex_offline_queue', JSON.stringify(offlineSyncQueue));
+                document.getElementById('passcodeField').value = '';
+                showToast("Stored Offline", "Saved locally.", "info");
+                renderStudentHistoryUI([...offlineSyncQueue]);
+                return;
+            }
+
+            submitBtn.disabled = true;
             try {
                 const { data: tData } = await supabaseClient.from('security_tokens').select('token').eq('id', 'active_session').single();
                 if (tokenSubmitted !== tData.token.toUpperCase()) {
-                    alert("Token validation failed.");
+                    showToast("Failed", "PIN entered is incorrect.", "error");
                     return;
                 }
 
-                const checkInDate = new Date().toISOString().split('T');
-                const { error } = await supabaseClient.from('attendance_logs').insert({
-                    student_id: studentProfile.id,
-                    student_name: studentProfile.name,
-                    course_id: activeSessionData.course_id,
-                    session_id: activeSessionData.id,
-                    check_in_date: checkInDate,
-                    is_flagged_proxy: false
-                });
-
+                const { error } = await supabaseClient.from('attendance_logs').insert(payload);
                 if (!error) {
                     document.getElementById('passcodeField').value = '';
+                    showToast("Success", "Presence logged securely.", "success");
                     fetchStudentPersonalHistory();
                 }
             } catch (err) { console.error(err); }
             finally { submitBtn.disabled = false; }
+        }
+
+        async function fetchStudentPersonalHistory() {
+            if (!supabaseClient || !studentProfile) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('attendance_logs')
+                    .select('course_id, check_in_date, checked_in_at, is_flagged_proxy')
+                    .eq('student_id', studentProfile.id)
+                    .order('checked_in_at', { ascending: false });
+
+                if (error) throw error;
+                renderStudentHistoryUI(data || []);
+            } catch (err) { console.error(err); }
+        }
+
+        function renderStudentHistoryUI(databaseRecords) {
+            const container = document.getElementById('studentHistoryList');
+            const unsyncedItems = offlineSyncQueue.filter(item => item.student_id === studentProfile.id);
+            const combinedLogs = [...unsyncedItems, ...databaseRecords];
+
+            if (combinedLogs.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No entries registered under this ID.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            combinedLogs.forEach(log => {
+                const timeStr = new Date(log.checked_in_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const div = document.createElement('div');
+                
+                if (log.pendingOffline) {
+                    div.className = "p-2.5 rounded-lg border text-xs flex justify-between items-center bg-amber-950/30 border-amber-500/30 text-amber-300 animate-pulse";
+                    div.innerHTML = `<div><p class="font-bold text-white-force">${log.course_id}</p><p class="text-[10px] text-amber-400">⏳ Unsynced Offline Log</p></div><span class="font-semibold">${timeStr}</span>`;
+                } else {
+                    div.className = `p-2.5 rounded-lg border text-xs flex justify-between items-center ${log.is_flagged_proxy ? 'bg-rose-950/20 border-rose-900/40 text-rose-300' : 'bg-slate-900/50 border-slate-800 text-slate-300'}`;
+                    div.innerHTML = `<div><p class="font-bold text-white-force">${log.course_id}</p><p class="text-[10px] text-slate-400">${log.check_in_date}</p></div><span class="font-semibold text-slate-400">${timeStr}</span>`;
+                }
+                container.appendChild(div);
+            });
         }
 
         async function loadAttendanceData() {
@@ -421,12 +519,9 @@
                 }
 
                 placeholder.classList.add('hidden');
-                
-                // HIGH VALUE ENGINE: Process live analytical counts
                 let flaggedCount = 0;
                 records.forEach(rec => {
                     if (rec.is_flagged_proxy) flaggedCount++;
-                    
                     const row = document.createElement('tr');
                     row.className = rec.is_flagged_proxy ? "bg-rose-950/30 border-b border-rose-900 text-rose-200" : "border-b border-slate-800 text-slate-300";
                     const timeStr = new Date(rec.checked_in_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -441,7 +536,6 @@
                     `;
                     logBody.appendChild(row);
                 });
-
                 updateAnalyticsDashboard(records.length, flaggedCount);
             } catch(err) { console.error(err); }
         }
@@ -449,7 +543,6 @@
         function updateAnalyticsDashboard(total, flagged) {
             document.getElementById('analyticsTotalAttendees').innerText = total;
             document.getElementById('analyticsFlaggedCount').innerText = flagged;
-            
             const rate = total > 0 ? Math.round(((total - flagged) / total) * 100) : 100;
             document.getElementById('analyticsIntegrityRate').innerText = `${rate}%`;
         }
@@ -469,7 +562,6 @@
                 tabStudent.className = "flex-1 text-center py-2.5 rounded-lg font-semibold text-sm text-slate-400 hover:text-white";
                 document.getElementById('studentSection').classList.add('hidden');
                 document.getElementById('teacherSection').classList.remove('hidden');
-
                 if (dashboardAuthenticated) loadAttendanceData();
             }
         }
@@ -516,7 +608,33 @@
                 document.getElementById('dashboardAuth').classList.add('hidden');
                 document.getElementById('dashboardMain').classList.remove('hidden');
                 loadAttendanceData();
+                syncActiveLectureSessionState();
             } else { alert("Invalid PIN"); }
+        }
+
+        function showToast(title, msg, type = 'info') {
+            const notif = document.getElementById('notificationAlert');
+            const icon = document.getElementById('notifIcon');
+            notif.classList.remove('hidden');
+            document.getElementById('notifTitle').innerText = title;
+            document.getElementById('notifMsg').innerText = msg;
+            if (type === 'success') {
+                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-emerald-900/90 border-emerald-500/40 flex items-start gap-3 sticky top-16 z-50";
+                icon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>`;
+            } else {
+                notif.className = "max-w-md mx-auto mb-4 p-4 rounded-xl border bg-blue-900/90 border-blue-500/40 flex items-start gap-3 sticky top-16 z-50";
+                icon.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-lg"></i>`;
+            }
+            setTimeout(() => { notif.classList.add('hidden'); }, 5000);
+        }
+
+        function detectUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            if (token) {
+                document.getElementById('passcodeField').value = token.toUpperCase();
+                showToast("QR Link Scanned", "Verification code autofilled from deep link parameters.", "success");
+            }
         }
     </script>
 </body>
